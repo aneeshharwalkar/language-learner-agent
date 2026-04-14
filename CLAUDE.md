@@ -12,3 +12,7 @@ API contract: docs/api-contract.md — never modify without team agreement
 Do not touch files outside your assigned directory.
 Do not modify docs/api-contract.md.
 Commit frequently with clear messages.
+
+QA report: docs/qa-report.md — read this before starting work.
+It lists BLOCKERs that must be fixed before the April 24 demo,
+plus WARNINGs and NOTEs scoped to each agent's area.
