@@ -42,44 +42,55 @@
   </main>
 
   <script>
-    // ── Mock toggle ──────────────────────────────────────────────────────────
-    // Set USE_MOCK = false once the backend is running.
     const USE_MOCK = false;
+    const API_URL = "http://localhost:5000/chat";
+    const FETCH_TIMEOUT_MS = 15000;
 
-    const MOCK_RESPONSES = {
+    const DIALECTS = {
       "mexican-spanish": {
-        reply: "¡Claro que sí! En México usamos mucho el tuteo informal. ¿De qué quieres hablar hoy?",
-        agent: "Mexican Spanish Agent",
-        correction: "You wrote 'Yo quiero ir a la tienda' — that's grammatically correct! In casual speech, the 'Yo' subject pronoun is often dropped: 'Quiero ir a la tienda.'",
-        vocab_tip: "Tienda can mean 'store' or 'tent' depending on context. For a shop, you can also say 'la tiendita' (little shop) in everyday Mexican Spanish."
+        flag: "🇲🇽",
+        mock: {
+          reply: "¡Claro que sí! En México usamos mucho el tuteo informal. ¿De qué quieres hablar hoy?",
+          agent: "Mexican Spanish Agent",
+          correction: "You wrote 'Yo quiero ir a la tienda' — that's grammatically correct! In casual speech, the 'Yo' subject pronoun is often dropped: 'Quiero ir a la tienda.'",
+          vocab_tip: "Tienda can mean 'store' or 'tent' depending on context. For a shop, you can also say 'la tiendita' (little shop) in everyday Mexican Spanish."
+        }
       },
       "castilian-spanish": {
-        reply: "¡Por supuesto! En España usamos el vosotros para el plural informal. ¿En qué puedo ayudarte?",
-        agent: "Castilian Spanish Agent",
-        correction: null,
-        vocab_tip: "In Spain, 'vosotros' is the standard informal second-person plural. In Latin America, 'ustedes' is used for both formal and informal plural."
+        flag: "🇪🇸",
+        mock: {
+          reply: "¡Por supuesto! En España usamos el vosotros para el plural informal. ¿En qué puedo ayudarte?",
+          agent: "Castilian Spanish Agent",
+          correction: null,
+          vocab_tip: "In Spain, 'vosotros' is the standard informal second-person plural. In Latin America, 'ustedes' is used for both formal and informal plural."
+        }
       }
     };
 
     async function sendMessage(dialect, message, turn) {
       if (USE_MOCK) {
-        await new Promise(r => setTimeout(r, 600)); // simulate network delay
-        return MOCK_RESPONSES[dialect] ?? MOCK_RESPONSES["mexican-spanish"];
+        await new Promise(r => setTimeout(r, 600));
+        return DIALECTS[dialect]?.mock ?? DIALECTS["mexican-spanish"].mock;
       }
 
-      const res = await fetch("http://localhost:5000/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dialect, message, turn })
-      });
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
-      return res.json();
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dialect, message, turn }),
+          signal: controller.signal
+        });
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        return res.json();
+      } finally {
+        clearTimeout(timer);
+      }
     }
 
-    // ── State ────────────────────────────────────────────────────────────────
     let turn = 0;
 
-    // ── DOM refs ─────────────────────────────────────────────────────────────
     const messagesEl = document.getElementById("messages");
     const form       = document.getElementById("chat-form");
     const input      = document.getElementById("user-input");
@@ -87,16 +98,22 @@
     const dialectEl  = document.getElementById("dialect");
     const flagEl     = document.getElementById("dialect-flag");
 
-    const DIALECT_FLAGS = {
-      "mexican-spanish":   "🇲🇽",
-      "castilian-spanish": "🇪🇸"
-    };
-
     dialectEl.addEventListener("change", () => {
-      flagEl.textContent = DIALECT_FLAGS[dialectEl.value];
+      flagEl.textContent = DIALECTS[dialectEl.value].flag;
     });
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    function escapeHtml(str) {
+      const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+      return str.replace(/[&<>"]/g, c => map[c]);
+    }
+
+    function createCallout(icon, label, content, modifier) {
+      const el = document.createElement("div");
+      el.className = `callout callout-${modifier}`;
+      el.innerHTML = `<span class="callout-icon">${icon}</span><span class="callout-text"><strong>${label}:</strong> ${escapeHtml(content)}</span>`;
+      return el;
+    }
+
     function scrollToBottom() {
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
@@ -113,33 +130,18 @@
       const wrapper = document.createElement("div");
       wrapper.className = "message-group";
 
-      // Agent label
       const label = document.createElement("div");
       label.className = "agent-label";
       label.textContent = data.agent;
       wrapper.appendChild(label);
 
-      // Reply bubble
       const reply = document.createElement("div");
       reply.className = "message agent-message";
       reply.textContent = data.reply;
       wrapper.appendChild(reply);
 
-      // Correction callout (only if not null)
-      if (data.correction) {
-        const correction = document.createElement("div");
-        correction.className = "callout callout-correction";
-        correction.innerHTML = `<span class="callout-icon">✏️</span><span class="callout-text"><strong>Correction:</strong> ${escapeHtml(data.correction)}</span>`;
-        wrapper.appendChild(correction);
-      }
-
-      // Vocab tip callout (only if not null)
-      if (data.vocab_tip) {
-        const vocab = document.createElement("div");
-        vocab.className = "callout callout-vocab";
-        vocab.innerHTML = `<span class="callout-icon">📖</span><span class="callout-text"><strong>Vocab tip:</strong> ${escapeHtml(data.vocab_tip)}</span>`;
-        wrapper.appendChild(vocab);
-      }
+      if (data.correction) wrapper.appendChild(createCallout("✏️", "Correction", data.correction, "correction"));
+      if (data.vocab_tip)  wrapper.appendChild(createCallout("📖", "Vocab tip",  data.vocab_tip,  "vocab"));
 
       messagesEl.appendChild(wrapper);
       scrollToBottom();
@@ -154,20 +156,11 @@
     }
 
     function setLoading(loading) {
-      sendBtn.disabled = loading;
-      input.disabled   = loading;
+      sendBtn.disabled    = loading;
+      input.disabled      = loading;
       sendBtn.textContent = loading ? "..." : "Send";
     }
 
-    function escapeHtml(str) {
-      return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    // ── Form submit ──────────────────────────────────────────────────────────
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const message = input.value.trim();
@@ -183,7 +176,11 @@
         turn++;
         appendAgentMessage(data);
       } catch (err) {
-        appendErrorMessage("Could not reach the backend. Is the server running?");
+        appendErrorMessage(
+          err.name === "AbortError"
+            ? "Request timed out. Is the backend running?"
+            : "Could not reach the backend. Is the server running?"
+        );
       } finally {
         setLoading(false);
         input.focus();
