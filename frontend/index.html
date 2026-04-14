@@ -82,7 +82,14 @@
           body: JSON.stringify({ dialect, message, turn }),
           signal: controller.signal
         });
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        if (!res.ok) {
+          let errorMsg = `Server error: ${res.status}`;
+          try {
+            const body = await res.json();
+            if (body.error) errorMsg = body.error;
+          } catch (_) {}
+          throw new Error(errorMsg);
+        }
         return res.json();
       } finally {
         clearTimeout(timer);
@@ -100,6 +107,12 @@
 
     dialectEl.addEventListener("change", () => {
       flagEl.textContent = DIALECTS[dialectEl.value].flag;
+      const dialectName = dialectEl.options[dialectEl.selectedIndex].text;
+      const msg = document.createElement("div");
+      msg.className = "system-msg";
+      msg.textContent = `— Switched to ${dialectName} —`;
+      messagesEl.appendChild(msg);
+      scrollToBottom();
     });
 
     function escapeHtml(str) {
@@ -133,10 +146,15 @@
       const label = document.createElement("div");
       label.className = "agent-label";
       label.textContent = data.agent;
+      const langTag = document.createElement("span");
+      langTag.className = "lang-tag";
+      langTag.textContent = "ES";
+      label.appendChild(langTag);
       wrapper.appendChild(label);
 
       const reply = document.createElement("div");
       reply.className = "message agent-message";
+      reply.setAttribute("lang", "es");
       reply.textContent = data.reply;
       wrapper.appendChild(reply);
 
@@ -179,7 +197,9 @@
         appendErrorMessage(
           err.name === "AbortError"
             ? "Request timed out. Is the backend running?"
-            : "Could not reach the backend. Is the server running?"
+            : err.message.startsWith("Server error:")
+              ? err.message
+              : "Could not reach the backend. Is the server running?"
         );
       } finally {
         setLoading(false);

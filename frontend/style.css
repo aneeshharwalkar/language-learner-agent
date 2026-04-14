@@ -187,14 +187,30 @@ main {
   letter-spacing: 0.07em;
   color: var(--accent);
   padding-left: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lang-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 3px;
+  padding: 0.05rem 0.35rem;
+  letter-spacing: 0.05em;
+  font-style: normal;
 }
 
 .agent-message {
   background: var(--agent-bubble);
   color: var(--agent-text);
   border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
   align-self: flex-start;
   border-bottom-left-radius: 3px;
+  font-style: italic;
 }
 
 /* ── Inline callouts ─────────────────────────────────────────────────────── */
