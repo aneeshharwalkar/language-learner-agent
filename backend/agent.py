@@ -10,6 +10,8 @@ import sys
 import anthropic
 from dotenv import load_dotenv
 
+from content import get_content_summary
+
 load_dotenv()
 
 AGENTS = {
@@ -18,7 +20,7 @@ AGENTS = {
         "persona": (
             "You are Carlos, a warm and patient Mexican Spanish tutor from Mexico City. "
             "You naturally use Mexican expressions: 'ahorita', 'órale', 'chido', 'cuate', '¿Mande?'. "
-            "You address learners as 'ustedes' in informal contexts and speak with Mexican warmth."
+            "You use 'ustedes' for informal plural address (no vosotros). Address a single learner as 'tú'."
         ),
     },
     "castilian-spanish": {
@@ -32,6 +34,8 @@ AGENTS = {
 }
 
 _SYSTEM_TEMPLATE = """{persona}
+
+{content_summary}
 
 The learner is practicing conversational Spanish. Respond ONLY with a JSON object — no extra text, no markdown:
 {{
@@ -53,10 +57,15 @@ def chat(dialect: str, message: str) -> dict:
     agent = AGENTS[dialect]
     client = anthropic.Anthropic()
 
+    system = _SYSTEM_TEMPLATE.format(
+        persona=agent["persona"],
+        content_summary=get_content_summary(dialect),
+    )
+
     response = client.messages.create(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=512,
-        system=_SYSTEM_TEMPLATE.format(persona=agent["persona"]),
+        system=system,
         messages=[{"role": "user", "content": message}],
     )
 
@@ -66,6 +75,10 @@ def chat(dialect: str, message: str) -> dict:
     if text.startswith("```"):
         text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
     data = json.loads(text)
+
+    if "reply" not in data:
+        raise ValueError("Agent response missing required 'reply' field")
+
     data["agent"] = agent["name"]
     return data
 
