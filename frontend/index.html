@@ -13,6 +13,7 @@
       <h1>Language Learner</h1>
       <div class="dialect-selector">
         <label for="dialect">Dialect</label>
+        <span id="dialect-flag" aria-hidden="true">🇲🇽</span>
         <select id="dialect">
           <option value="mexican-spanish">Mexican Spanish</option>
           <option value="castilian-spanish">Castilian Spanish</option>
@@ -84,6 +85,16 @@
     const input      = document.getElementById("user-input");
     const sendBtn    = document.getElementById("send-btn");
     const dialectEl  = document.getElementById("dialect");
+    const flagEl     = document.getElementById("dialect-flag");
+
+    const DIALECT_FLAGS = {
+      "mexican-spanish":   "🇲🇽",
+      "castilian-spanish": "🇪🇸"
+    };
+
+    dialectEl.addEventListener("change", () => {
+      flagEl.textContent = DIALECT_FLAGS[dialectEl.value];
+    });
 
     // ── Helpers ──────────────────────────────────────────────────────────────
     function scrollToBottom() {

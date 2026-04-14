@@ -83,6 +83,12 @@ header h1 {
   white-space: nowrap;
 }
 
+#dialect-flag {
+  font-size: 1.4rem;
+  line-height: 1;
+  user-select: none;
+}
+
 .dialect-selector select {
   appearance: none;
   -webkit-appearance: none;
