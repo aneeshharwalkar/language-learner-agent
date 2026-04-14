@@ -13,8 +13,8 @@ Godwin-Jones, R. (2018). Contextualized vocabulary learning. *Language Learning 
 - Godwin-Jones calls for task-based, input-rich, and socially embedded vocabulary instruction as the path toward communicative transfer.
 - Highlights the gap between *knowing* a word and *using* it — a distinction critical to conversational fluency that apps systematically underaddress.
 
-**Key Quote:**
-> Apps "teach vocabulary in isolated units rather than relevant contexts... despite a pedagogical shift toward communicative approaches, these apps are behaviorist in nature."
+**Key Quote / Paraphrase:**
+> *[Paraphrase — no verbatim quote available without page number]:* Godwin-Jones argues that most vocabulary apps present words "in isolated units rather than relevant contexts" and, despite a broader pedagogical shift toward communicative approaches, remain "behaviorist in nature" in their reliance on drill-and-recall mechanics. See pp. 1–4 for the framing argument on decontextualized learning.
 
 ---
 

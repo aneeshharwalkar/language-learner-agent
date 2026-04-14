@@ -13,8 +13,8 @@ Essoe, J. K.-Y., Reggente, N., Ohno, A. A., Baek, Y. H., Dell'Italia, J., & Riss
 - Separate-context learners produced **38% fewer cross-language intrusions**, demonstrating reduced interference — directly relevant to dialect-specific learning.
 - Critical moderator: the retention benefit required participants to perceive the VR environment as a genuine space (high "presence"); passive screen-watching did not produce the effect.
 
-**Key Quote:**
-> "Those who learned each language in its own unique context showed improved one-week retention (92%) compared to those learning in the same context (76%)."
+**Key Quote / Paraphrase:**
+> *[Paraphrase of reported results — verify against abstract before using as a direct quotation in slides]:* Participants who learned each language in its own unique VR context showed improved one-week retention (~92%) compared to those who learned both languages in the same context (~76%).
 
 ---
 

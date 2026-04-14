@@ -18,4 +18,6 @@ Kristensen, J. K., Torkildsen, J. v. K., & Andersson, B. (2024). Repeated mistak
 
 ---
 
+**Generalizability Caveat:** The study population is 363 Norwegian-speaking **second-graders (children, L1 Norwegian)**. The present project targets **adult Spanish learners**. The error-repetition mechanism is likely to generalize — motivational differences between child and adult learners may affect persistence rates but not the structural compounding effect — however, claims about adult transfer failure should not cite this study directly without this qualification. Use it for mechanism-level argument only; pair with Mihaylova et al. (2022) for adult-learner evidence.
+
 **Rubric Phase:** Phase 2 — documents a concrete mechanism of transfer failure in app-based learning and motivates the need for adaptive, context-aware feedback.
