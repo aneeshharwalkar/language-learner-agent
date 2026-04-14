@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Language Learner Agent</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <h1>Language Learner</h1>
+      <div class="dialect-selector">
+        <label for="dialect">Dialect</label>
+        <select id="dialect">
+          <option value="mexican-spanish">Mexican Spanish</option>
+          <option value="castilian-spanish">Castilian Spanish</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div id="chat-window">
+      <div id="messages">
+        <div class="system-msg">Select a dialect above and start chatting in Spanish. The agent will respond, correct mistakes, and share vocabulary tips.</div>
+      </div>
+    </div>
+
+    <form id="chat-form">
+      <input
+        type="text"
+        id="user-input"
+        placeholder="Type a message in Spanish..."
+        autocomplete="off"
+        autofocus
+      />
+      <button type="submit" id="send-btn">Send</button>
+    </form>
+  </main>
+
+  <script>
+    // ── Mock toggle ──────────────────────────────────────────────────────────
+    // Set USE_MOCK = false once the backend is running.
+    const USE_MOCK = true;
+
+    const MOCK_RESPONSES = {
+      "mexican-spanish": {
+        reply: "¡Claro que sí! En México usamos mucho el tuteo informal. ¿De qué quieres hablar hoy?",
+        agent: "Mexican Spanish Agent",
+        correction: "You wrote 'Yo quiero ir a la tienda' — that's grammatically correct! In casual speech, the 'Yo' subject pronoun is often dropped: 'Quiero ir a la tienda.'",
+        vocab_tip: "Tienda can mean 'store' or 'tent' depending on context. For a shop, you can also say 'la tiendita' (little shop) in everyday Mexican Spanish."
+      },
+      "castilian-spanish": {
+        reply: "¡Por supuesto! En España usamos el vosotros para el plural informal. ¿En qué puedo ayudarte?",
+        agent: "Castilian Spanish Agent",
+        correction: null,
+        vocab_tip: "In Spain, 'vosotros' is the standard informal second-person plural. In Latin America, 'ustedes' is used for both formal and informal plural."
+      }
+    };
+
+    async function sendMessage(dialect, message, turn) {
+      if (USE_MOCK) {
+        await new Promise(r => setTimeout(r, 600)); // simulate network delay
+        return MOCK_RESPONSES[dialect] ?? MOCK_RESPONSES["mexican-spanish"];
+      }
+
+      const res = await fetch("http://localhost:5000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dialect, message, turn })
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      return res.json();
+    }
+
+    // ── State ────────────────────────────────────────────────────────────────
+    let turn = 0;
+
+    // ── DOM refs ─────────────────────────────────────────────────────────────
+    const messagesEl = document.getElementById("messages");
+    const form       = document.getElementById("chat-form");
+    const input      = document.getElementById("user-input");
+    const sendBtn    = document.getElementById("send-btn");
+    const dialectEl  = document.getElementById("dialect");
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function scrollToBottom() {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function appendUserMessage(text) {
+      const div = document.createElement("div");
+      div.className = "message user-message";
+      div.textContent = text;
+      messagesEl.appendChild(div);
+      scrollToBottom();
+    }
+
+    function appendAgentMessage(data) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "message-group";
+
+      // Agent label
+      const label = document.createElement("div");
+      label.className = "agent-label";
+      label.textContent = data.agent;
+      wrapper.appendChild(label);
+
+      // Reply bubble
+      const reply = document.createElement("div");
+      reply.className = "message agent-message";
+      reply.textContent = data.reply;
+      wrapper.appendChild(reply);
+
+      // Correction callout (only if not null)
+      if (data.correction) {
+        const correction = document.createElement("div");
+        correction.className = "callout callout-correction";
+        correction.innerHTML = `<span class="callout-icon">✏️</span><span class="callout-text"><strong>Correction:</strong> ${escapeHtml(data.correction)}</span>`;
+        wrapper.appendChild(correction);
+      }
+
+      // Vocab tip callout (only if not null)
+      if (data.vocab_tip) {
+        const vocab = document.createElement("div");
+        vocab.className = "callout callout-vocab";
+        vocab.innerHTML = `<span class="callout-icon">📖</span><span class="callout-text"><strong>Vocab tip:</strong> ${escapeHtml(data.vocab_tip)}</span>`;
+        wrapper.appendChild(vocab);
+      }
+
+      messagesEl.appendChild(wrapper);
+      scrollToBottom();
+    }
+
+    function appendErrorMessage(msg) {
+      const div = document.createElement("div");
+      div.className = "system-msg error-msg";
+      div.textContent = msg;
+      messagesEl.appendChild(div);
+      scrollToBottom();
+    }
+
+    function setLoading(loading) {
+      sendBtn.disabled = loading;
+      input.disabled   = loading;
+      sendBtn.textContent = loading ? "..." : "Send";
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    // ── Form submit ──────────────────────────────────────────────────────────
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const message = input.value.trim();
+      if (!message) return;
+
+      const dialect = dialectEl.value;
+      input.value = "";
+      appendUserMessage(message);
+      setLoading(true);
+
+      try {
+        const data = await sendMessage(dialect, message, turn);
+        turn++;
+        appendAgentMessage(data);
+      } catch (err) {
+        appendErrorMessage("Could not reach the backend. Is the server running?");
+      } finally {
+        setLoading(false);
+        input.focus();
+      }
+    });
+  </script>
+</body>
+</html>
