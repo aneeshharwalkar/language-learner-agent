@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Research Report — Language Learner Agent · Applied Human Factors, Spring 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0b0d10;
+    --surface:   #13161b;
+    --card:      #1a1e26;
+    --card-2:    #1e232c;
+    --border:    rgba(255,255,255,0.07);
+    --border-2:  rgba(255,255,255,0.12);
+
+    --blue:      #7b9fe0;
+    --blue-dim:  rgba(123,159,224,0.12);
+    --pink:      #e07baa;
+    --pink-dim:  rgba(224,123,170,0.12);
+    --green:     #7be0b4;
+    --green-dim: rgba(123,224,180,0.12);
+    --amber:     #e0c27b;
+    --amber-dim: rgba(224,194,123,0.12);
+    --red:       #e07b7b;
+    --red-dim:   rgba(224,123,123,0.12);
+
+    --text:      #f0f2f5;
+    --text-soft: #c8cdd8;
+    --muted:     #6b7280;
+    --subtle:    #3a3f4a;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrapper { max-width: 1280px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  /* ── Header ── */
+  header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-top { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+  .logo {
+    width: 38px; height: 38px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--blue), var(--pink));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px; color: #fff;
+    flex-shrink: 0;
+    letter-spacing: -0.5px;
+  }
+  h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.3px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .header-meta { color: var(--muted); font-size: 13px; margin-top: 12px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .header-meta span::before { content: '·'; margin-right: 14px; color: var(--subtle); }
+  .header-meta span:first-child::before { content: ''; margin: 0; }
+
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 11px; border-radius: 20px; font-size: 11.5px; font-weight: 500;
+  }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); }
+  .badge-green { background: var(--green-dim); color: var(--green); }
+  .badge-amber { background: var(--amber-dim); color: var(--amber); }
+  .badge-red   { background: var(--red-dim);   color: var(--red);   }
+  .badge-pink  { background: var(--pink-dim);  color: var(--pink);  }
+
+  /* ── Sections ── */
+  .section { margin-bottom: 52px; }
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .section-label .num {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: var(--card); border: 1px solid var(--border);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--text);
+  }
+
+  h2 { font-size: 18px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.2px; }
+  h3 { font-size: 14px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.1px; }
+  p { color: var(--text-soft); margin-bottom: 10px; }
+  p:last-child { margin-bottom: 0; }
+  em { color: var(--text); font-style: italic; }
+  strong { color: var(--text); font-weight: 600; }
+
+  /* ── Executive summary ── */
+  .exec-summary {
+    background: linear-gradient(135deg, rgba(123,159,224,0.08) 0%, rgba(224,123,170,0.06) 100%);
+    border: 1px solid rgba(123,159,224,0.2);
+    border-radius: 14px; padding: 26px 30px;
+  }
+  .exec-summary h2 { font-size: 16px; font-weight: 700; margin-bottom: 14px; color: var(--blue); letter-spacing: 0.3px; text-transform: uppercase; font-size: 12px; }
+  .exec-summary p { color: var(--text-soft); font-size: 14.5px; line-height: 1.75; margin-bottom: 12px; }
+  .exec-summary .thesis { font-size: 16.5px; color: var(--text); font-weight: 500; line-height: 1.6; }
+  .exec-summary p:last-child { margin-bottom: 0; }
+
+  /* ── Stat cards ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    border-radius: 12px 12px 0 0;
+  }
+  .stat-card.blue::before  { background: linear-gradient(90deg, var(--blue), transparent); }
+  .stat-card.pink::before  { background: linear-gradient(90deg, var(--pink), transparent); }
+  .stat-card.green::before { background: linear-gradient(90deg, var(--green), transparent); }
+  .stat-card.amber::before { background: linear-gradient(90deg, var(--amber), transparent); }
+  .stat-card.red::before   { background: linear-gradient(90deg, var(--red), transparent); }
+
+  .stat-number {
+    font-size: 30px; font-weight: 700; letter-spacing: -1px;
+    margin-bottom: 6px; line-height: 1.1;
+  }
+  .stat-card.blue  .stat-number { color: var(--blue); }
+  .stat-card.pink  .stat-number { color: var(--pink); }
+  .stat-card.green .stat-number { color: var(--green); }
+  .stat-card.amber .stat-number { color: var(--amber); }
+  .stat-card.red   .stat-number { color: var(--red); }
+  .stat-label { font-size: 13px; color: var(--text); font-weight: 500; margin-bottom: 2px; }
+  .stat-sub   { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+
+  /* ── Phase map ── */
+  .phase-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 1100px) { .phase-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .phase-grid { grid-template-columns: 1fr; } }
+  .phase-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 18px 16px;
+    display: flex; flex-direction: column;
+    gap: 10px;
+  }
+  .phase-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  }
+  .phase-num {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  }
+  .phase-pts { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .phase-card.red   .phase-num { color: var(--red); }
+  .phase-card.amber .phase-num { color: var(--amber); }
+  .phase-card.blue  .phase-num { color: var(--blue); }
+  .phase-card.pink  .phase-num { color: var(--pink); }
+  .phase-card.green .phase-num { color: var(--green); }
+  .phase-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .phase-body  { font-size: 12.5px; color: var(--text-soft); line-height: 1.55; }
+  .phase-sources {
+    margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border);
+    font-size: 11.5px; color: var(--muted); line-height: 1.6;
+  }
+  .phase-sources b { color: var(--text); font-weight: 500; }
+
+  /* ── HFACS chain ── */
+  .hfacs-chain {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  @media (max-width: 1000px) { .hfacs-chain { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .hfacs-chain { grid-template-columns: 1fr; } }
+  .hfacs-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .hfacs-card::before {
+    content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+    border-radius: 12px 0 0 12px;
+  }
+  .hfacs-card.red::before   { background: var(--red); }
+  .hfacs-card.amber::before { background: var(--amber); }
+  .hfacs-card.pink::before  { background: var(--pink); }
+  .hfacs-card.blue::before  { background: var(--blue); }
+  .hfacs-level {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .hfacs-card.red   .hfacs-level { color: var(--red); }
+  .hfacs-card.amber .hfacs-level { color: var(--amber); }
+  .hfacs-card.pink  .hfacs-level { color: var(--pink); }
+  .hfacs-card.blue  .hfacs-level { color: var(--blue); }
+  .hfacs-title { font-size: 14.5px; font-weight: 600; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
+  .hfacs-failure {
+    font-size: 12.5px; color: var(--text-soft); margin-bottom: 10px; line-height: 1.55;
+  }
+  .hfacs-cites {
+    font-size: 11px; color: var(--muted); font-weight: 500; line-height: 1.6;
+    padding-top: 10px; border-top: 1px solid var(--border); margin-top: auto;
+  }
+  .hfacs-cites b { color: var(--text); font-weight: 500; }
+
+  /* ── Enemies ── */
+  .enemy-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+  }
+  @media (max-width: 700px) { .enemy-grid { grid-template-columns: 1fr; } }
+  .enemy-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 22px;
+  }
+  .enemy-card.a { border-color: rgba(224,123,123,0.25); background: rgba(224,123,123,0.03); }
+  .enemy-card.b { border-color: rgba(224,194,123,0.25); background: rgba(224,194,123,0.03); }
+  .enemy-card.c { border-color: rgba(224,123,170,0.25); background: rgba(224,123,170,0.03); }
+  .enemy-card.d { border-color: rgba(123,159,224,0.25); background: rgba(123,159,224,0.03); }
+  .enemy-num { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 2px; letter-spacing: -1px; }
+  .enemy-card.a .enemy-num { color: var(--red); }
+  .enemy-card.b .enemy-num { color: var(--amber); }
+  .enemy-card.c .enemy-num { color: var(--pink); }
+  .enemy-card.d .enemy-num { color: var(--blue); }
+  .enemy-name { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .enemy-body { font-size: 13px; color: var(--text-soft); line-height: 1.6; }
+  .enemy-body em { color: var(--text); }
+
+  /* ── Intervention ── */
+  .intervention {
+    background: linear-gradient(135deg, rgba(123,224,180,0.06) 0%, rgba(123,159,224,0.04) 100%);
+    border: 1px solid rgba(123,224,180,0.2);
+    border-radius: 14px;
+    padding: 24px 28px;
+  }
+  .intervention h2 {
+    color: var(--green); font-size: 12px; font-weight: 700; letter-spacing: 0.3px;
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .intervention-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px;
+  }
+  @media (max-width: 900px) { .intervention-grid { grid-template-columns: 1fr; } }
+  .int-pillar {
+    padding: 14px 16px; border-radius: 10px;
+    background: rgba(11,13,16,0.4); border: 1px solid var(--border);
+  }
+  .int-pillar-head { font-size: 12px; font-weight: 700; color: var(--green); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .int-pillar-body { font-size: 12.5px; color: var(--text-soft); line-height: 1.55; }
+  .int-pillar-body b { color: var(--text); font-weight: 500; }
+  .int-honest {
+    margin-top: 20px; padding: 14px 16px;
+    background: rgba(224,194,123,0.06); border-left: 3px solid var(--amber);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px; color: var(--text-soft); line-height: 1.65;
+  }
+  .int-honest b { color: var(--amber); }
+
+  /* ── Source index ── */
+  .src-table { width: 100%; border-collapse: collapse; }
+  .src-table th {
+    text-align: left; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--muted); padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .src-table td {
+    padding: 11px 12px; font-size: 12.5px;
+    border-bottom: 1px solid var(--border); vertical-align: top;
+    color: var(--text-soft);
+  }
+  .src-table tr:last-child td { border-bottom: none; }
+  .src-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .src-cite { color: var(--text); font-weight: 500; }
+  .src-venue { font-style: italic; color: var(--muted); font-size: 12px; }
+  .src-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+  .src-chip {
+    font-size: 10.5px; padding: 2px 8px; border-radius: 12px; font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .chip-p1 { background: var(--red-dim);   color: var(--red); }
+  .chip-p2 { background: var(--amber-dim); color: var(--amber); }
+  .chip-p3 { background: var(--blue-dim);  color: var(--blue); }
+  .chip-p4 { background: var(--pink-dim);  color: var(--pink); }
+  .chip-p5 { background: var(--green-dim); color: var(--green); }
+
+  /* ── Gap analysis ── */
+  .gap-list { display: flex; flex-direction: column; gap: 10px; }
+  .gap-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 14px 16px; border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .gap-icon {
+    width: 26px; height: 26px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-weight: 700; font-size: 11px; letter-spacing: 0.5px;
+  }
+  .gap-item.known   .gap-icon { background: var(--amber-dim); color: var(--amber); }
+  .gap-item.missing .gap-icon { background: var(--red-dim);   color: var(--red); }
+  .gap-item.future  .gap-icon { background: var(--green-dim); color: var(--green); }
+  .gap-content { flex: 1; }
+  .gap-title { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .gap-body  { color: var(--text-soft); font-size: 12.5px; line-height: 1.55; }
+
+  /* ── Callout ── */
+  .callout {
+    border-left: 3px solid var(--blue);
+    background: var(--blue-dim);
+    padding: 16px 20px; border-radius: 0 10px 10px 0;
+    margin-top: 20px;
+  }
+  .callout p { font-size: 13.5px; line-height: 1.7; color: var(--text-soft); margin: 0; }
+  .callout strong { color: var(--text); }
+
+  /* ── Footer ── */
+  footer {
+    margin-top: 64px; padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
+  }
+  footer a { color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--subtle); }
+  footer a:hover { color: var(--text); border-color: var(--muted); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--subtle); border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* ── Print ── */
+  @media print {
+    body { background: #fff; color: #000; }
+    .wrapper { max-width: 100%; padding: 20px; }
+    .section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <div class="logo">LLA</div>
+    <div>
+      <h1>Research Report — Language Learner Agent</h1>
+      <div class="subtitle">Deploying conversational agents to bridge the learning-transfer gap in Duolingo</div>
+    </div>
+  </div>
+  <div class="header-meta">
+    <span>Applied Human Factors · Spring 2026</span>
+    <span>Preston Cusick + Aneesh Harwalkar</span>
+    <span>2-person team · 8-min Lightning Talk</span>
+    <span>Due April 24, 2026</span>
+  </div>
+  <div class="badges">
+    <span class="badge badge-blue">Evaluate → Analyze → Improve</span>
+    <span class="badge badge-pink">HFACS · Swiss Cheese</span>
+    <span class="badge badge-amber">System failure, not user failure</span>
+    <span class="badge badge-green">14 sources · 5 rubric phases covered</span>
+  </div>
+</header>
+
+<!-- EXEC SUMMARY -->
+<section class="section">
+  <div class="section-label"><span class="num">01</span> Executive Summary</div>
+  <div class="exec-summary">
+    <h2>The thesis, in three sentences</h2>
+    <p class="thesis">Duolingo produces measurable receptive-skill gains but not conversational competence, and the gap is a property of the system — not the learner. Across fourteen sources spanning cognitive psychology, second-language acquisition, human-factors engineering, and first-party algorithmic disclosure, the holes align across all four HFACS layers: the operator has no signal, the environment has no context, the supervisor measures the wrong variable, and the organization never measures what matters. Our proposed intervention — dialect-specific conversational AI agents — targets the three preconditions the literature says are required for transfer: episodic context, social embodiment, and sociolinguistic variation.</p>
+    <p>This dashboard organizes the research we've gathered against the five-phase final-project rubric, traces the HFACS chain through the evidence, and is honest about what the literature supports and what it doesn't. The goal is to make every claim we plan to make on a slide traceable back to a source on this page.</p>
+  </div>
+</section>
+
+<!-- HEADLINE NUMBERS -->
+<section class="section">
+  <div class="section-label"><span class="num">02</span> Headline Numbers</div>
+  <div class="stats-grid">
+    <div class="stat-card red">
+      <div class="stat-number">Int. Low</div>
+      <div class="stat-label">Duolingo's measured ceiling</div>
+      <div class="stat-sub">Reading: Intermediate Low. Listening: Novice High. Speaking was never assessed — below the Intermediate Mid–High threshold where real conversation begins. <em>(Jiang et al., 2021)</em></div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-number">~92% vs ~76%</div>
+      <div class="stat-label">Context reinstatement effect</div>
+      <div class="stat-sub">One-week vocabulary retention: ~92% when each language was learned in its own distinct VR context vs. ~76% in a uniform context. Episodic encoding matters. <em>(Essoe et al., 2022 — paraphrased figures)</em></div>
+    </div>
+    <div class="stat-card pink">
+      <div class="stat-number">d = 1.3</div>
+      <div class="stat-label">Personalization Principle</div>
+      <div class="stat-sub">Effect size across 10 of 10 experiments: conversational delivery produces deeper learning than formal delivery. The persona isn't decoration — it's the mechanism. <em>(Mayer, 2021)</em></div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-number">d = 0.58</div>
+      <div class="stat-label">Dialogue-based CALL works</div>
+      <div class="stat-sub">Meta-analysis across 17 effectiveness studies (k = 100 effect sizes): conversational-agent practice produces a medium effect on L2 proficiency. Intervention-side evidence. <em>(Bibauw et al., 2022)</em></div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-number">0 / 4</div>
+      <div class="stat-label">Productive skills measured</div>
+      <div class="stat-sub">Duolingo's own outcome study reports only reading and listening — speaking and writing are never assessed. <em>"No other skills were assessed."</em> This is the organizational-layer hole in the Swiss Cheese. <em>(Jiang et al., 2021)</em></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5-PHASE RUBRIC MAP -->
+<section class="section">
+  <div class="section-label"><span class="num">03</span> Mapped to the Five-Phase Rubric</div>
+  <p style="margin-bottom: 18px; color: var(--text-soft);">Each rubric phase pulls from a distinct cluster of sources. We built the research corpus backwards from the rubric — if a phase didn't have sourced support, we went looking for it.</p>
+
+  <div class="phase-grid">
+    <div class="phase-card red">
+      <div class="phase-head">
+        <div class="phase-num">Phase 1</div>
+        <div class="phase-pts">20 pts</div>
+      </div>
+      <div class="phase-title">System &amp; Context</div>
+      <div class="phase-body">Duolingo as human-machine system, under the three stressor categories from class: <em>internal</em> (cognitive load, metacognitive illusion), <em>external</em> (engagement mechanics, streak pressure), and <em>organizational</em> (DAU incentives, Innovator's Dilemma). The measurable ceiling and the illusion of progress from inside the system.</div>
+      <div class="phase-sources">
+        <b>Jiang (2021)</b> — ACTFL ceiling on receptive skills<br>
+        <b>Bicknell &amp; Brust (2020)</b> — Birdbrain, first-party<br>
+        <b>Kornell &amp; Bjork (2008)</b> — metacognitive illusion
+      </div>
+    </div>
+
+    <div class="phase-card amber">
+      <div class="phase-head">
+        <div class="phase-num">Phase 2</div>
+        <div class="phase-pts">10 pts</div>
+      </div>
+      <div class="phase-title">Task &amp; User Analysis</div>
+      <div class="phase-body">The four HF demand lenses: <em>Attention</em> (inattentional blindness on XP/streaks), <em>Memory</em> (Phonological Loop vs. Episodic Buffer), <em>Workload</em> (under-loaded production, over-loaded gamification), <em>Cognition</em> (pragmatic knowledge not built). Recognition-tasks succeed, production-tasks fail.</div>
+      <div class="phase-sources">
+        <b>Godwin-Jones (2018)</b> — decontextualized drill<br>
+        <b>Kristensen (2024)</b> — error repetition mechanism<br>
+        <b>Mihaylova (2022)</b> — weak long-term transfer<br>
+        <b>Geeslin &amp; Long (2014)</b> — sociolinguistic variation
+      </div>
+    </div>
+
+    <div class="phase-card blue">
+      <div class="phase-head">
+        <div class="phase-num">Phase 3</div>
+        <div class="phase-pts">10 pts</div>
+      </div>
+      <div class="phase-title">Data &amp; Methodology</div>
+      <div class="phase-body">Our methodology is research- and build-based given the two-week window. We lean on the meta-analytic evidence to stand in for a primary study we can't run, and propose a future RCT design modeled on Wang's 12-week structure — extended in duration and scaffolding, since Wang's speaking-performance result was null.</div>
+      <div class="phase-sources">
+        <b>Mihaylova (2022)</b> — MALL meta-analysis<br>
+        <b>Bibauw (2022)</b> — dialogue-CALL meta-analysis<br>
+        <b>Wang (2024)</b> — 12-week quasi-experimental design (structure to extend)
+      </div>
+    </div>
+
+    <div class="phase-card pink">
+      <div class="phase-head">
+        <div class="phase-num">Phase 4</div>
+        <div class="phase-pts">20 pts</div>
+      </div>
+      <div class="phase-title">Human Factors Analysis</div>
+      <div class="phase-body">The HFACS walk across all four levels — unsafe acts, preconditions, unsafe supervision, organizational influences. Each level gets a named failure and a cited mechanism.</div>
+      <div class="phase-sources">
+        <b>Baddeley (2000)</b> — Episodic Buffer (L2)<br>
+        <b>Cannon-Bowers &amp; Salas (1998)</b> — TADMUS (L2/L3)<br>
+        <b>Bhaskara (2021)</b> — automation transparency (L4)<br>
+        <b>Essoe (2022)</b> — context reinstatement (L2)<br>
+        <b>Mayer (2021)</b> — social agency (L4)
+      </div>
+    </div>
+
+    <div class="phase-card green">
+      <div class="phase-head">
+        <div class="phase-num">Phase 5</div>
+        <div class="phase-pts">20 pts</div>
+      </div>
+      <div class="phase-title">Redesign &amp; Recommendations</div>
+      <div class="phase-body">The proof-of-concept: a conversational agent that scaffolds interaction, uses an embodied social persona, and offers dialect-specific variation. Tied to findings, grounded in HF principles. System map included to illustrate the redesigned information flow.</div>
+      <div class="phase-sources">
+        <b>Bibauw (2022)</b> — dialogue CALL works (d = 0.58)<br>
+        <b>Wang (2024)</b> — honest mixed-result on GenAI chatbots<br>
+        <b>Mayer (2021)</b> — Embodiment Principle<br>
+        <b>Geeslin &amp; Long (2014)</b> — why dialect-specific
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HFACS CHAIN -->
+<section class="section">
+  <div class="section-label"><span class="num">04</span> The HFACS Chain — Holes Aligned</div>
+  <p style="margin-bottom: 18px; color: var(--text-soft);">The class gave us the method: <em>work backward through all four HFACS levels, avoid blaming individuals, look for system breakdowns.</em> The Swiss Cheese tells the story — holes at every layer, and they line up.</p>
+
+  <div class="hfacs-chain">
+    <div class="hfacs-card red">
+      <div class="hfacs-level">Level 1 · Unsafe Acts</div>
+      <div class="hfacs-title">Skill-Based Errors with No Signal</div>
+      <div class="hfacs-failure">Learners practice routines that produce consistent wrong outputs. Signal Detection Theory explains why: the correct signal (speaking competence) is never placed in the operator's attentional field. What's visible — XP, streaks, crowns — is a False Alarm.</div>
+      <div class="hfacs-cites"><b>Evidence:</b> Jiang (2021); Kristensen (2024); Kornell &amp; Bjork (2008)</div>
+    </div>
+
+    <div class="hfacs-card amber">
+      <div class="hfacs-level">Level 2 · Preconditions</div>
+      <div class="hfacs-title">Episodic Buffer Foreclosed by Design</div>
+      <div class="hfacs-failure">Working memory's Episodic Buffer binds verbal content to context. Duolingo engages only the Phonological Loop. Separate contexts produce ~92% retention vs. ~76% in uniform contexts — a mechanism the gamified interface architecturally forecloses.</div>
+      <div class="hfacs-cites"><b>Evidence:</b> Baddeley (2000); Essoe (2022); Godwin-Jones (2018); Mihaylova (2022); Cannon-Bowers &amp; Salas (1998)</div>
+    </div>
+
+    <div class="hfacs-card pink">
+      <div class="hfacs-level">Level 3 · Unsafe Supervision</div>
+      <div class="hfacs-title">Algorithm Optimizes the Wrong Variable</div>
+      <div class="hfacs-failure">Duolingo's Birdbrain, by the company's own description, matches item difficulty to learner ability — an item-correctness optimizer. It does not detect, adapt to, or feedback on conversational performance. Supervisor <em>d&prime;</em> for transfer failure is effectively zero.</div>
+      <div class="hfacs-cites"><b>Evidence:</b> Bicknell &amp; Brust (2020); Jiang (2021); Kristensen (2024); Godwin-Jones (2018); Cannon-Bowers &amp; Salas (1998)</div>
+    </div>
+
+    <div class="hfacs-card blue">
+      <div class="hfacs-level">Level 4 · Organizational</div>
+      <div class="hfacs-title">DAU Incentives Select Against Transfer</div>
+      <div class="hfacs-failure">The Innovator's Dilemma in motion: engagement KPIs (DAU, streaks) reward exactly the features that forecast poorly for transfer. Transparency about the wrong signal — confident progress indicators — amplifies a mis-calibrated learner model rather than surfacing the gap.</div>
+      <div class="hfacs-cites"><b>Evidence:</b> Mayer (2021); Bhaskara (2021); Jiang (2021); Godwin-Jones (2018)</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Reading the chain upward:</strong> organizational KPIs exclude speaking (L4) → the algorithm never tasks or measures speaking (L3) → the environment provides no contextual encoding (L2) → the learner has no signal to act on (L1). The incident — failure to transfer to real conversation — is structurally predicted. This is the course's core tenet made concrete: <em>error is a system property, not a human shortcoming.</em></p>
+  </div>
+</section>
+
+<!-- NAME THE ENEMY -->
+<section class="section">
+  <div class="section-label"><span class="num">05</span> Name the Enemy</div>
+  <p style="margin-bottom: 18px; color: var(--text-soft);">Following the class framing — Rosling, Tufte, Musk — we name each failure directly. Four enemies, four sourced mechanisms.</p>
+
+  <div class="enemy-grid">
+    <div class="enemy-card a">
+      <div class="enemy-num">01</div>
+      <div class="enemy-name">The Decontextualized Drill</div>
+      <div class="enemy-body">Vocabulary taught as isolated items, not in socially embedded context. Spaced repetition works for <em>memorization</em>; it does not build <em>pragmatic knowledge</em>. Baddeley supplies the mechanism — the Episodic Buffer that binds content to context — and Essoe supplies the behavioral evidence that distinct encoding contexts lift retention. <br><span style="color:var(--muted); font-size: 11.5px;">Godwin-Jones · Baddeley · Essoe</span></div>
+    </div>
+
+    <div class="enemy-card b">
+      <div class="enemy-num">02</div>
+      <div class="enemy-name">The Wrong Signal</div>
+      <div class="enemy-body">Streaks, XP, and crown levels are transparent — about the wrong variable. TADMUS and automation-transparency research both show that confident displays of the wrong metric can degrade performance relative to diagnostic feedback, because they suppress the skepticism that would prompt supplementary practice. <br><span style="color:var(--muted); font-size: 11.5px;">Cannon-Bowers · Bhaskara · Kornell &amp; Bjork</span></div>
+    </div>
+
+    <div class="enemy-card c">
+      <div class="enemy-num">03</div>
+      <div class="enemy-name">The Receptive-Only Evidence Base</div>
+      <div class="enemy-body">Duolingo's own outcome research measures reading and listening. Speaking is <em>unsupervised by design</em>. Birdbrain, by the company's own description, optimizes item-correctness, not conversational competence. The supervisor's detection sensitivity for the project's terminal goal is zero. <br><span style="color:var(--muted); font-size: 11.5px;">Jiang · Bicknell &amp; Brust</span></div>
+    </div>
+
+    <div class="enemy-card d">
+      <div class="enemy-num">04</div>
+      <div class="enemy-name">The Aligned Holes</div>
+      <div class="enemy-body">The Swiss Cheese stack — L4 KPIs, L3 algorithm, L2 environment, L1 learner — all open in the same place. Any single hole could be worked around; all four open together makes failure structural. The redesign target is any layer; changing one misaligns the stack. <br><span style="color:var(--muted); font-size: 11.5px;">Reason's framework · our full corpus</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERVENTION -->
+<section class="section">
+  <div class="section-label"><span class="num">06</span> Intervention Evidence — Why a Conversational Agent</div>
+  <div class="intervention">
+    <h2>The three pillars of the redesign — each sourced</h2>
+    <p style="color: var(--text-soft); font-size: 14px;">Our proof-of-concept rests on three claims the literature supports. We're not inventing new mechanisms; we're combining three well-evidenced ones that gamified apps have left on the table.</p>
+
+    <div class="intervention-grid">
+      <div class="int-pillar">
+        <div class="int-pillar-head">Pillar 1 · Dialogue Works</div>
+        <div class="int-pillar-body"><b>Bibauw et al. (2022)</b>, a three-level meta-analysis across 17 studies, found a medium effect (<b>d = 0.58</b>) of dialogue-based CALL on L2 proficiency — with stronger effects for <em>system-guided</em> interaction and corrective feedback. Our agent scaffolds, not just responds.</div>
+      </div>
+      <div class="int-pillar">
+        <div class="int-pillar-head">Pillar 2 · Persona Matters</div>
+        <div class="int-pillar-body"><b>Mayer (2021)</b> — personalization <em>d = 1.3</em> across 10/10 experiments; the Voice and Embodiment Principles add further, separate effects. A Mexican-Spanish "Carlos" and a Castilian-Spanish "Elena" aren't UX decoration — conversational style plus embodiment is what invokes Social Agency Theory.</div>
+      </div>
+      <div class="int-pillar">
+        <div class="int-pillar-head">Pillar 3 · Dialect Is the Input</div>
+        <div class="int-pillar-body"><b>Geeslin &amp; Long (2014)</b> — communicative competence requires acquiring <em>sociolinguistic variation</em>, not a standardized idealization. Dialect-specific agents put real input variability in front of the learner, which the classroom and the app both omit.</div>
+      </div>
+    </div>
+
+    <div class="int-honest">
+      <b>An honest note.</b> <b>Wang et al. (2024)</b> ran a 12-week quasi-experiment with adult learners (<em>n</em> = 99, CEFR B1–B2) and found that an embodied GenAI chatbot significantly improved willingness to communicate, self-perceived competence, and reduced speaking anxiety — but <em>did not move pre-to-post measured speaking performance</em>. Our reading: affective and motivational preconditions move fast; objective speaking scores need longer or more structured intervention. A proof-of-concept is proof of plausibility, not proof of effect. Proposing a future RCT is the right move.
+    </div>
+  </div>
+</section>
+
+<!-- SOURCE INDEX -->
+<section class="section">
+  <div class="section-label"><span class="num">07</span> Source Index</div>
+  <p style="margin-bottom: 16px; color: var(--text-soft);">Fourteen sources. Peer-reviewed unless otherwise noted. Full summaries live in <code style="color:var(--blue); font-family: inherit;">docs/research/</code>.</p>
+
+  <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 8px; overflow-x: auto;">
+    <table class="src-table">
+      <thead>
+        <tr>
+          <th>Citation</th>
+          <th>Venue</th>
+          <th>Year</th>
+          <th>Focus</th>
+          <th>Rubric Phase</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="src-cite">Baddeley, A.</td><td class="src-venue">Trends in Cognitive Sciences</td><td>2000</td><td>Episodic Buffer — WM architecture</td><td><span class="src-chip chip-p4">P4</span></td></tr>
+        <tr><td class="src-cite">Bhaskara et al.</td><td class="src-venue">Applied Ergonomics</td><td>2021</td><td>Automation transparency as a variable</td><td><span class="src-chip chip-p4">P4</span></td></tr>
+        <tr><td class="src-cite">Bibauw, François, Desmet et al.</td><td class="src-venue">Language Learning &amp; Technology</td><td>2022</td><td>Meta-analysis, dialogue-based CALL</td><td><span class="src-chips"><span class="src-chip chip-p3">P3</span><span class="src-chip chip-p5">P5</span></span></td></tr>
+        <tr><td class="src-cite">Bicknell &amp; Brust</td><td class="src-venue">Duolingo Research Blog</td><td>2020</td><td>Birdbrain — first-party algorithmic disclosure</td><td><span class="src-chip chip-p1">P1</span></td></tr>
+        <tr><td class="src-cite">Cannon-Bowers &amp; Salas (Eds.)</td><td class="src-venue">APA · TADMUS</td><td>1998</td><td>Decision-making under stress, feedback calibration</td><td><span class="src-chip chip-p4">P4</span></td></tr>
+        <tr><td class="src-cite">Essoe et al.</td><td class="src-venue">npj Science of Learning</td><td>2022</td><td>VR context reinstatement, retention</td><td><span class="src-chip chip-p4">P4</span></td></tr>
+        <tr><td class="src-cite">Geeslin &amp; Long</td><td class="src-venue">Routledge SLA Series</td><td>2014</td><td>Sociolinguistic variation in SLA — motivates dialect-specific design</td><td><span class="src-chips"><span class="src-chip chip-p2">P2</span><span class="src-chip chip-p5">P5</span></span></td></tr>
+        <tr><td class="src-cite">Godwin-Jones</td><td class="src-venue">Language Learning &amp; Technology</td><td>2018</td><td>Decontextualized vocabulary learning</td><td><span class="src-chip chip-p2">P2</span></td></tr>
+        <tr><td class="src-cite">Jiang, Rollinson, Plonsky et al.</td><td class="src-venue">Foreign Language Annals</td><td>2021</td><td>Duolingo ACTFL outcomes (reading/listening only)</td><td><span class="src-chip chip-p1">P1</span></td></tr>
+        <tr><td class="src-cite">Kornell &amp; Bjork</td><td class="src-venue">Psychological Science</td><td>2008</td><td>Metacognitive illusions in self-paced study</td><td><span class="src-chip chip-p1">P1</span></td></tr>
+        <tr><td class="src-cite">Kristensen, Torkildsen &amp; Andersson</td><td class="src-venue">Computers &amp; Education</td><td>2024</td><td>Error repetition in app-based learning</td><td><span class="src-chip chip-p2">P2</span></td></tr>
+        <tr><td class="src-cite">Mayer, R. E.</td><td class="src-venue">Cambridge Handbook of Multimedia Learning (3rd ed.)</td><td>2021</td><td>Personalization, Voice, Embodiment principles</td><td><span class="src-chips"><span class="src-chip chip-p4">P4</span><span class="src-chip chip-p5">P5</span></span></td></tr>
+        <tr><td class="src-cite">Mihaylova, Gorin, Reber &amp; Rothen</td><td class="src-venue">Psychologica Belgica</td><td>2022</td><td>Meta-analysis, mobile-assisted language learning</td><td><span class="src-chips"><span class="src-chip chip-p2">P2</span><span class="src-chip chip-p3">P3</span></span></td></tr>
+        <tr><td class="src-cite">Wang, Zou, Du &amp; Wang</td><td class="src-venue">System</td><td>2024</td><td>GenAI chatbots + adult EFL speaking (mixed result)</td><td><span class="src-chips"><span class="src-chip chip-p3">P3</span><span class="src-chip chip-p5">P5</span></span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- GAP ANALYSIS -->
+<section class="section">
+  <div class="section-label"><span class="num">08</span> Gap Analysis — What the Research Doesn't Yet Support</div>
+  <p style="margin-bottom: 16px; color: var(--text-soft);">The rubric asks for a gap analysis in Phase 5. Here are the honest holes in our evidence base — the places a skeptical reader should push.</p>
+
+  <div class="gap-list">
+    <div class="gap-item known">
+      <div class="gap-icon">KNOWN</div>
+      <div class="gap-content">
+        <div class="gap-title">Kristensen (2024) is second-graders, not adults</div>
+        <div class="gap-body">The error-repetition study population is 363 Norwegian L1 children, not adult Spanish learners. The mechanism likely generalizes, but we use it for mechanism-level argument only, not as direct adult-learner evidence. Paired with Mihaylova and our adult-facing sources on the intervention side.</div>
+      </div>
+    </div>
+    <div class="gap-item known">
+      <div class="gap-icon">KNOWN</div>
+      <div class="gap-content">
+        <div class="gap-title">Wang (2024) is WTC and anxiety, not speaking performance</div>
+        <div class="gap-body">The one adult-learner GenAI-chatbot study in the corpus shows affective gains but no measurable speaking-performance lift in 12 weeks. We're explicit about this in the intervention section rather than hiding it behind the positive findings.</div>
+      </div>
+    </div>
+    <div class="gap-item missing">
+      <div class="gap-icon">MISSING</div>
+      <div class="gap-content">
+        <div class="gap-title">No primary data of our own</div>
+        <div class="gap-body">Given the two-week timeline we didn't run a user study, which means we can't make causal claims about our specific proof-of-concept. Our Phase 3 methodology is research-and-build; Phase 5 proposes a future RCT against a control group.</div>
+      </div>
+    </div>
+    <div class="gap-item missing">
+      <div class="gap-icon">MISSING</div>
+      <div class="gap-content">
+        <div class="gap-title">No direct evidence that dialect-specific agents outperform a single-dialect agent</div>
+        <div class="gap-body">Geeslin &amp; Long supports the theoretical case that sociolinguistic variation is acquisition-relevant, but we don't have an A/B evaluation of dialect-specific vs. generic Spanish agents. This is a clear candidate for the future-study proposal.</div>
+      </div>
+    </div>
+    <div class="gap-item future">
+      <div class="gap-icon">NEXT</div>
+      <div class="gap-content">
+        <div class="gap-title">Eye-tracking could sharpen the Level 1 attention claim</div>
+        <div class="gap-body">The IX Lab eye-tracking option from the rubric could turn the inattentional-blindness argument from conceptual to measurable: where does learner gaze actually fixate during a Duolingo session vs. during a conversation with our agent? A follow-on study worth naming in the lightning talk.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>Applied Human Factors · Spring 2026 · P. Cusick &amp; A. Harwalkar</div>
+  <div>Source files: <a href="./research/">docs/research/</a> · HFACS analysis: <a href="./hf-analysis/hfacs-analysis.md">docs/hf-analysis/hfacs-analysis.md</a> · QA report: <a href="./qa-report.md">docs/qa-report.md</a></div>
+</footer>
+
+</div>
+</body>
+</html>
