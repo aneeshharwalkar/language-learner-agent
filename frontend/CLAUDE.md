@@ -13,3 +13,14 @@ Build:
 
 You can mock /chat with a static JSON response during development.
 When UI is functional against mock, commit: "frontend: UI complete"
+
+UI/UX Skills available (invoke via /skill-name):
+  - /ui-ux-pro-max  — full UI/UX design workflow (start here for design tasks)
+  - /design         — visual design, logos, layout patterns
+  - /design-system  — component and token systems
+  - /ui-styling     — Tailwind, shadcn theming, responsive utilities
+  - /brand          — brand identity and color
+  - /banner-design  — banner/hero design
+  - /slides         — slide deck and presentation design
+
+Use these skills when making any visual or UX improvements to the frontend.

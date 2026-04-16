@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light" data-dialect="mexican-spanish">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,22 +10,50 @@
 
   <header>
     <div class="header-inner">
-      <h1>Language Learner</h1>
-      <div class="dialect-selector">
-        <label for="dialect">Dialect</label>
-        <span id="dialect-flag" aria-hidden="true">🇲🇽</span>
-        <select id="dialect">
-          <option value="mexican-spanish">Mexican Spanish</option>
-          <option value="castilian-spanish">Castilian Spanish</option>
-        </select>
+
+      <!-- Agent identity — reinforces Mayer (2021) Social Agency Theory / persona effect -->
+      <div class="header-left">
+        <div class="agent-avatar-header" id="agent-avatar-header">C</div>
+        <div class="header-info">
+          <h1 id="agent-name-header">Carlos</h1>
+          <span class="agent-subtitle">
+            <span class="status-dot"></span>
+            <span id="agent-subtitle-text">Mexican Spanish Tutor</span>
+          </span>
+        </div>
       </div>
+
+      <div class="header-right">
+        <!-- Dialect selector -->
+        <div class="dialect-pill">
+          <span id="dialect-flag" aria-hidden="true">🇲🇽</span>
+          <select id="dialect" aria-label="Select dialect">
+            <option value="mexican-spanish">Mexican Spanish</option>
+            <option value="castilian-spanish">Castilian Spanish</option>
+          </select>
+        </div>
+
+        <!-- Dark mode toggle — accessibility + evening study sessions -->
+        <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+      </div>
+
     </div>
   </header>
 
   <main>
     <div id="chat-window">
       <div id="messages">
-        <div class="system-msg">Select a dialect above and start chatting in Spanish. The agent will respond, correct mistakes, and share vocabulary tips.</div>
+        <div class="system-msg">
+          Say anything in Spanish — Carlos will respond, correct mistakes, and share vocab tips.
+        </div>
+      </div>
+
+      <!-- Typing indicator — Mayer Social Agency Theory: social presence cues improve engagement -->
+      <div id="typing-row" class="typing-row hidden">
+        <div class="agent-avatar" id="typing-avatar">C</div>
+        <div class="typing-bubble">
+          <span></span><span></span><span></span>
+        </div>
       </div>
     </div>
 
@@ -33,62 +61,221 @@
       <input
         type="text"
         id="user-input"
-        placeholder="Type a message in Spanish..."
+        placeholder="Type a message in Spanish…"
         autocomplete="off"
         autofocus
       />
-      <button type="submit" id="send-btn">Send</button>
+      <button type="submit" id="send-btn" aria-label="Send message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
     </form>
   </main>
 
   <script>
-    const USE_MOCK = false;
-    const API_URL = "http://localhost:8080/chat";
-    const FETCH_TIMEOUT_MS = 15000;
+    const USE_MOCK       = false;
+    const API_URL        = "http://localhost:8080/chat";
+    const FETCH_TIMEOUT  = 15000;
 
+    /* ── Dialect config ────────────────────────────────────────────────── */
     const DIALECTS = {
       "mexican-spanish": {
-        flag: "🇲🇽",
+        flag:     "🇲🇽",
+        name:     "Carlos",
+        subtitle: "Mexican Spanish Tutor",
+        initial:  "C",
         mock: {
           reply: "¡Claro que sí! En México usamos mucho el tuteo informal. ¿De qué quieres hablar hoy?",
-          agent: "Mexican Spanish Agent",
+          agent: "Carlos (Mexican Spanish)",
           correction: "You wrote 'Yo quiero ir a la tienda' — that's grammatically correct! In casual speech, the 'Yo' subject pronoun is often dropped: 'Quiero ir a la tienda.'",
-          vocab_tip: "Tienda can mean 'store' or 'tent' depending on context. For a shop, you can also say 'la tiendita' (little shop) in everyday Mexican Spanish."
+          vocab_tip: "Tienda can mean 'store' or 'tent' depending on context. You can also say 'la tiendita' (little shop) in everyday Mexican Spanish."
         }
       },
       "castilian-spanish": {
-        flag: "🇪🇸",
+        flag:     "🇪🇸",
+        name:     "Elena",
+        subtitle: "Castilian Spanish Tutor",
+        initial:  "E",
         mock: {
           reply: "¡Por supuesto! En España usamos el vosotros para el plural informal. ¿En qué puedo ayudarte?",
-          agent: "Castilian Spanish Agent",
+          agent: "Elena (Castilian Spanish)",
           correction: null,
           vocab_tip: "In Spain, 'vosotros' is the standard informal second-person plural. In Latin America, 'ustedes' is used for both formal and informal plural."
         }
       }
     };
 
+    /* ── DOM refs ──────────────────────────────────────────────────────── */
+    const html        = document.documentElement;
+    const messagesEl  = document.getElementById("messages");
+    const form        = document.getElementById("chat-form");
+    const input       = document.getElementById("user-input");
+    const sendBtn     = document.getElementById("send-btn");
+    const dialectEl   = document.getElementById("dialect");
+    const flagEl      = document.getElementById("dialect-flag");
+    const avatarHdr   = document.getElementById("agent-avatar-header");
+    const nameHdr     = document.getElementById("agent-name-header");
+    const subtitleEl  = document.getElementById("agent-subtitle-text");
+    const typingRow   = document.getElementById("typing-row");
+    const typingAvt   = document.getElementById("typing-avatar");
+    const themeToggle = document.getElementById("theme-toggle");
+
+    let turn = 0;
+
+    /* ── Theme toggle ──────────────────────────────────────────────────── */
+    themeToggle.addEventListener("click", () => {
+      const isDark = html.dataset.theme === "dark";
+      html.dataset.theme   = isDark ? "light" : "dark";
+      themeToggle.textContent = isDark ? "🌙" : "☀️";
+    });
+
+    /* ── Dialect change ────────────────────────────────────────────────── */
+    function applyDialect(key) {
+      const d = DIALECTS[key];
+      html.dataset.dialect    = key;
+      flagEl.textContent      = d.flag;
+      avatarHdr.textContent   = d.initial;
+      typingAvt.textContent   = d.initial;
+      nameHdr.textContent     = d.name;
+      subtitleEl.textContent  = d.subtitle;
+    }
+
+    dialectEl.addEventListener("change", () => {
+      const key  = dialectEl.value;
+      const d    = DIALECTS[key];
+      applyDialect(key);
+
+      /* System pill — visual record of dialect switch; stamped so later
+         switches don't re-color earlier pills */
+      const pill = document.createElement("div");
+      pill.className     = "dialect-change-msg";
+      pill.dataset.dialect = key;
+      pill.textContent   = `${d.flag} Switched to ${d.name} · ${d.subtitle}`;
+      messagesEl.appendChild(pill);
+      scrollToBottom();
+    });
+
+    /* ── Helpers ───────────────────────────────────────────────────────── */
+    function escapeHtml(str) {
+      const m = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
+      return str.replace(/[&<>"]/g, c => m[c]);
+    }
+
+    function nowTime() {
+      return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function scrollToBottom() {
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    /* ── Message rendering ─────────────────────────────────────────────── */
+    /* Each message row stamps data-dialect at append time; CSS scopes --accent
+       to the row so historical bubbles keep their original dialect color when
+       the selector switches. */
+    function appendUserMessage(text, dialectKey) {
+      const row = document.createElement("div");
+      row.className = "message-row user-row";
+      row.dataset.dialect = dialectKey;
+
+      /* Snapshot --accent from <html> at send time (matches the selected
+         dialect) and freeze inline so later selector switches don't repaint
+         historical user bubbles. */
+      const color = getComputedStyle(html).getPropertyValue("--accent").trim();
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble user-bubble";
+      bubble.style.backgroundColor = color;
+      bubble.innerHTML = `${escapeHtml(text)}<div class="bubble-meta"><span class="ts">${nowTime()}</span></div>`;
+
+      row.appendChild(bubble);
+      messagesEl.appendChild(row);
+      scrollToBottom();
+    }
+
+    function appendAgentMessage(data, dialectKey) {
+      const d = DIALECTS[dialectKey];
+
+      /* Row: avatar + message group */
+      const row = document.createElement("div");
+      row.className = "message-row agent-row";
+      row.dataset.dialect = dialectKey;
+
+      const avatar = document.createElement("div");
+      avatar.className   = "agent-avatar";
+      avatar.textContent = d.initial;
+
+      const group = document.createElement("div");
+      group.className = "message-group";
+
+      /* Main reply bubble */
+      const bubble = document.createElement("div");
+      bubble.className = "bubble agent-bubble";
+      bubble.setAttribute("lang", "es");
+      bubble.innerHTML = `${escapeHtml(data.reply)}<div class="bubble-meta"><span class="ts">${nowTime()}</span></div>`;
+      group.appendChild(bubble);
+
+      /* Correction card — Godwin-Jones 2018: explicit corrective feedback matters */
+      if (data.correction) {
+        const card = document.createElement("div");
+        card.className = "coaching-card";
+        card.innerHTML = `<span class="card-icon">✏️</span><span class="card-body"><span class="card-label">Correction</span>${escapeHtml(data.correction)}</span>`;
+        group.appendChild(card);
+      }
+
+      /* Vocab tip card */
+      if (data.vocab_tip) {
+        const card = document.createElement("div");
+        card.className = "coaching-card vocab";
+        card.innerHTML = `<span class="card-icon">📖</span><span class="card-body"><span class="card-label">Vocab tip</span>${escapeHtml(data.vocab_tip)}</span>`;
+        group.appendChild(card);
+      }
+
+      row.appendChild(avatar);
+      row.appendChild(group);
+      messagesEl.appendChild(row);
+      scrollToBottom();
+    }
+
+    function appendErrorMessage(msg) {
+      const div = document.createElement("div");
+      div.className   = "system-msg error-msg";
+      div.textContent = msg;
+      messagesEl.appendChild(div);
+      scrollToBottom();
+    }
+
+    /* ── Loading state ─────────────────────────────────────────────────── */
+    function setLoading(loading) {
+      sendBtn.disabled = loading;
+      input.disabled   = loading;
+      typingRow.classList.toggle("hidden", !loading);
+      if (loading) scrollToBottom();
+    }
+
+    /* ── Fetch ─────────────────────────────────────────────────────────── */
     async function sendMessage(dialect, message, turn) {
       if (USE_MOCK) {
-        await new Promise(r => setTimeout(r, 600));
+        await new Promise(r => setTimeout(r, 900));
         return DIALECTS[dialect]?.mock ?? DIALECTS["mexican-spanish"].mock;
       }
 
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
       try {
         const res = await fetch(API_URL, {
-          method: "POST",
+          method:  "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ dialect, message, turn }),
-          signal: controller.signal
+          body:    JSON.stringify({ dialect, message, turn }),
+          signal:  controller.signal
         });
         if (!res.ok) {
-          let errorMsg = `Server error: ${res.status}`;
-          try {
-            const body = await res.json();
-            if (body.error) errorMsg = body.error;
-          } catch (_) {}
-          throw new Error(errorMsg);
+          let msg = `Server error: ${res.status}`;
+          try { const b = await res.json(); if (b.error) msg = b.error; } catch (_) {}
+          throw new Error(msg);
         }
         return res.json();
       } finally {
@@ -96,89 +283,7 @@
       }
     }
 
-    let turn = 0;
-
-    const messagesEl = document.getElementById("messages");
-    const form       = document.getElementById("chat-form");
-    const input      = document.getElementById("user-input");
-    const sendBtn    = document.getElementById("send-btn");
-    const dialectEl  = document.getElementById("dialect");
-    const flagEl     = document.getElementById("dialect-flag");
-
-    dialectEl.addEventListener("change", () => {
-      flagEl.textContent = DIALECTS[dialectEl.value].flag;
-      const dialectName = dialectEl.options[dialectEl.selectedIndex].text;
-      const msg = document.createElement("div");
-      msg.className = "system-msg";
-      msg.textContent = `— Switched to ${dialectName} —`;
-      messagesEl.appendChild(msg);
-      scrollToBottom();
-    });
-
-    function escapeHtml(str) {
-      const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
-      return str.replace(/[&<>"]/g, c => map[c]);
-    }
-
-    function createCallout(icon, label, content, modifier) {
-      const el = document.createElement("div");
-      el.className = `callout callout-${modifier}`;
-      el.innerHTML = `<span class="callout-icon">${icon}</span><span class="callout-text"><strong>${label}:</strong> ${escapeHtml(content)}</span>`;
-      return el;
-    }
-
-    function scrollToBottom() {
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    function appendUserMessage(text) {
-      const div = document.createElement("div");
-      div.className = "message user-message";
-      div.textContent = text;
-      messagesEl.appendChild(div);
-      scrollToBottom();
-    }
-
-    function appendAgentMessage(data) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "message-group";
-
-      const label = document.createElement("div");
-      label.className = "agent-label";
-      label.textContent = data.agent;
-      const langTag = document.createElement("span");
-      langTag.className = "lang-tag";
-      langTag.textContent = "ES";
-      label.appendChild(langTag);
-      wrapper.appendChild(label);
-
-      const reply = document.createElement("div");
-      reply.className = "message agent-message";
-      reply.setAttribute("lang", "es");
-      reply.textContent = data.reply;
-      wrapper.appendChild(reply);
-
-      if (data.correction) wrapper.appendChild(createCallout("✏️", "Correction", data.correction, "correction"));
-      if (data.vocab_tip)  wrapper.appendChild(createCallout("📖", "Vocab tip",  data.vocab_tip,  "vocab"));
-
-      messagesEl.appendChild(wrapper);
-      scrollToBottom();
-    }
-
-    function appendErrorMessage(msg) {
-      const div = document.createElement("div");
-      div.className = "system-msg error-msg";
-      div.textContent = msg;
-      messagesEl.appendChild(div);
-      scrollToBottom();
-    }
-
-    function setLoading(loading) {
-      sendBtn.disabled    = loading;
-      input.disabled      = loading;
-      sendBtn.textContent = loading ? "..." : "Send";
-    }
-
+    /* ── Submit ────────────────────────────────────────────────────────── */
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const message = input.value.trim();
@@ -186,13 +291,13 @@
 
       const dialect = dialectEl.value;
       input.value = "";
-      appendUserMessage(message);
+      appendUserMessage(message, dialect);
       setLoading(true);
 
       try {
         const data = await sendMessage(dialect, message, turn);
         turn++;
-        appendAgentMessage(data);
+        appendAgentMessage(data, dialect);
       } catch (err) {
         appendErrorMessage(
           err.name === "AbortError"

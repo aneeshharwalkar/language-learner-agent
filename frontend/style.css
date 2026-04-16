@@ -1,114 +1,245 @@
-/* ── Reset & base ───────────────────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* ── Reset ─────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Design tokens ─────────────────────────────────────────────────────── */
 :root {
-  --bg:           #f5f3ef;
+  /* Surfaces */
+  --bg:           #f0ece8;
   --surface:      #ffffff;
-  --border:       #e0dbd2;
-  --accent:       #4a7c59;       /* earthy green — language / nature feel */
-  --accent-light: #eaf2ec;
-  --text-primary: #1a1a1a;
-  --text-muted:   #6b6b6b;
-  --user-bubble:  #4a7c59;
+  --chat-surface: #ffffff;   /* chat window card bg */
+  --header-bg:    #ffffff;   /* light mode: white header */
+  --header-text:  #111827;
+  --header-border:#e5e7eb;
+  --input-bar:    #f5f3f0;
+  --border:       #e5e7eb;
+
+  /* Accent — overridden per dialect below */
+  --accent:       #128c7e;
+  --accent-dark:  #0a6660;
+  --accent-rgb:   18, 140, 126;
+
+  /* Text */
+  --text-primary: #111827;
+  --text-muted:   #6b7280;
+  --text-ts:      #9ca3af;
+
+  /* Bubbles */
+  --user-bg:      var(--accent);
   --user-text:    #ffffff;
-  --agent-bubble: #ffffff;
-  --agent-text:   #1a1a1a;
-  --correction-bg:#fff8e1;
-  --correction-border: #f0c040;
-  --vocab-bg:     #e8f4fd;
-  --vocab-border: #6cb4e4;
-  --error:        #c0392b;
-  --radius:       12px;
-  --shadow:       0 2px 8px rgba(0,0,0,0.08);
-  font-size: 16px;
+  --agent-bg:     #ffffff;
+  --agent-text:   #111827;
+
+  /* Avatar */
+  --avatar-bg:    var(--accent);
+
+  /* Coaching cards */
+  --card-correction-bg:     #fef9c3;
+  --card-correction-border: #f59e0b;
+  --card-vocab-bg:          #dbeafe;
+  --card-vocab-border:      #3b82f6;
+
+  /* Status */
+  --error: #ef4444;
+
+  /* Geometry */
+  --radius-bubble: 18px;
+  --radius-card:   10px;
+  --radius-input:  24px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
 }
 
-html, body {
-  height: 100%;
+/* ── Dialect themes — flag-inspired, visually distinct in light + dark ──
+   Applied at the <html> level (global UI: header, input bar, current pill)
+   AND at the row/pill level (message history: locks past messages to the
+   dialect they were sent in, so switching selectors doesn't repaint history). */
+[data-dialect="mexican-spanish"] {
+  --accent:     #16803a;
+  --accent-dark:#0f5c2a;
+  --accent-rgb: 22, 128, 58;
 }
+[data-dialect="castilian-spanish"] {
+  --accent:     #b45309;
+  --accent-dark:#923f05;
+  --accent-rgb: 180, 83, 9;
+}
+
+/* ── Dark mode ─────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg:           #1a1a2e;
+  --surface:      #16213e;
+  --chat-surface: #16213e;
+  --header-bg:    #0f3460;   /* distinct deep blue — clear contrast from body */
+  --header-text:  #e2e8f0;
+  --header-border:#1e4a8a;
+  --input-bar:    #1e2d4a;
+  --border:       #2d3748;
+  --text-primary: #e2e8f0;
+  --text-muted:   #94a3b8;
+  --text-ts:      #64748b;
+  --agent-bg:     #243352;   /* slightly lighter than card bg for contrast */
+  --agent-text:   #e2e8f0;
+  --card-correction-bg:     #2d1f00;
+  --card-correction-border: #d97706;
+  --card-vocab-bg:          #0c1f3f;
+  --card-vocab-border:      #3b82f6;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+html, body { height: 100%; }
 
 body {
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   background: var(--bg);
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
   height: 100dvh;
+  transition: background 0.25s, color 0.25s;
 }
 
-/* ── Header ─────────────────────────────────────────────────────────────── */
+/* ── Header ────────────────────────────────────────────────────────────── */
 header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow);
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--header-border);
   flex-shrink: 0;
-  padding: 0 1.25rem;
+  padding: 0 1rem;
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+  transition: background 0.25s, border-color 0.25s;
 }
 
 .header-inner {
   max-width: 760px;
   margin: 0 auto;
-  height: 60px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
-header h1 {
-  font-size: 1.2rem;
+/* Agent identity block (left) */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.agent-avatar-header {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: var(--accent);
-  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
+  transition: background 0.3s;
+}
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.header-info h1 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--header-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agent-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   white-space: nowrap;
 }
 
-/* ── Dialect selector ───────────────────────────────────────────────────── */
-.dialect-selector {
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #4ade80;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Right controls */
+.header-right {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
-.dialect-selector label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  white-space: nowrap;
+/* Dialect selector */
+.dialect-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1.5px solid rgba(var(--accent-rgb), 0.25);
+  border-radius: 20px;
+  padding: 0.25rem 0.6rem 0.25rem 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
-#dialect-flag {
-  font-size: 1.4rem;
-  line-height: 1;
-  user-select: none;
-}
+.dialect-pill:hover { background: rgba(var(--accent-rgb), 0.14); }
 
-.dialect-selector select {
+#dialect-flag { font-size: 1.1rem; line-height: 1; user-select: none; }
+
+.dialect-pill select {
   appearance: none;
   -webkit-appearance: none;
-  background: var(--accent-light) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a7c59' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 10px center;
-  border: 1.5px solid var(--accent);
-  border-radius: 8px;
+  background: transparent;
+  border: none;
   color: var(--accent);
-  cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  padding: 0.35rem 2rem 0.35rem 0.7rem;
-  transition: box-shadow 0.15s;
+  cursor: pointer;
+  padding-right: 0.2rem;
 }
 
-.dialect-selector select:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.2);
+.dialect-pill select:focus { outline: none; }
+
+[data-theme="dark"] .dialect-pill select option { background: #0f3460; }
+
+/* Theme toggle */
+#theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
 }
 
-/* ── Main layout ─────────────────────────────────────────────────────────── */
+#theme-toggle:hover { background: rgba(var(--accent-rgb), 0.08); border-color: var(--accent); }
+
+/* ── Main layout ───────────────────────────────────────────────────────── */
 main {
   flex: 1;
   display: flex;
@@ -116,220 +247,287 @@ main {
   max-width: 760px;
   width: 100%;
   margin: 0 auto;
-  padding: 1rem;
-  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  gap: 0.6rem;
   min-height: 0;
 }
 
-/* ── Chat window ─────────────────────────────────────────────────────────── */
+/* ── Chat window — card feel like previous design ──────────────────────── */
 #chat-window {
   flex: 1;
-  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  background: var(--chat-surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
   overflow: hidden;
   min-height: 0;
+  position: relative;
+  transition: background 0.25s, border-color 0.25s;
 }
 
 #messages {
-  height: 100%;
+  flex: 1;
   overflow-y: auto;
-  padding: 1.25rem;
+  padding: 1rem 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   scroll-behavior: smooth;
+  background: var(--chat-surface);
 }
 
-#messages::-webkit-scrollbar {
-  width: 6px;
+#messages::-webkit-scrollbar { width: 5px; }
+#messages::-webkit-scrollbar-track { background: transparent; }
+#messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Avatars ───────────────────────────────────────────────────────────── */
+.agent-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: flex-end;
+  transition: background 0.3s;
 }
 
-#messages::-webkit-scrollbar-track {
-  background: transparent;
+/* ── Message bubbles ───────────────────────────────────────────────────── */
+.message-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
 }
 
-#messages::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
-}
+.message-row.user-row  { justify-content: flex-end; }
+.message-row.agent-row { justify-content: flex-start; }
 
-/* ── Message bubbles ─────────────────────────────────────────────────────── */
-.message {
-  max-width: 72%;
-  padding: 0.65rem 1rem;
-  border-radius: var(--radius);
+.bubble {
+  max-width: 68%;
+  padding: 0.6rem 0.9rem;
   line-height: 1.55;
   font-size: 0.95rem;
   word-break: break-word;
+  position: relative;
 }
 
-.user-message {
-  background: var(--user-bubble);
+/* User bubble — accent colored, rounded with small tail */
+.user-bubble {
+  background: var(--user-bg);
   color: var(--user-text);
-  align-self: flex-end;
-  border-bottom-right-radius: 3px;
+  border-radius: var(--radius-bubble) var(--radius-bubble) 4px var(--radius-bubble);
+  box-shadow: var(--shadow-sm);
 }
 
+/* Agent bubble — white/dark, rounded with small tail */
+.agent-bubble {
+  background: var(--agent-bg);
+  color: var(--agent-text);
+  border-radius: var(--radius-bubble) var(--radius-bubble) var(--radius-bubble) 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Timestamp inside bubble */
+.bubble-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
+}
+
+.ts {
+  font-size: 0.68rem;
+  color: var(--text-ts);
+  white-space: nowrap;
+}
+
+.user-bubble .ts { color: rgba(255,255,255,0.65); }
+
+/* ── Message group (agent reply + coaching cards) ─────────────────────── */
 .message-group {
   display: flex;
   flex-direction: column;
+  gap: 0.35rem;
   align-items: flex-start;
-  gap: 0.4rem;
-  max-width: 80%;
+  max-width: 76%;
 }
 
-.agent-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--accent);
-  padding-left: 0.25rem;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.lang-tag {
-  font-size: 0.65rem;
-  font-weight: 700;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 3px;
-  padding: 0.05rem 0.35rem;
-  letter-spacing: 0.05em;
-  font-style: normal;
-}
-
-.agent-message {
-  background: var(--agent-bubble);
-  color: var(--agent-text);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  align-self: flex-start;
-  border-bottom-left-radius: 3px;
-  font-style: italic;
-}
-
-/* ── Inline callouts ─────────────────────────────────────────────────────── */
-.callout {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  border-radius: 8px;
-  padding: 0.6rem 0.9rem;
-  font-size: 0.86rem;
+/* Coaching cards — grounded in Godwin-Jones 2018 explicit feedback importance */
+.coaching-card {
+  background: var(--card-correction-bg);
+  border-left: 3px solid var(--card-correction-border);
+  border-radius: var(--radius-card);
+  padding: 0.55rem 0.85rem;
+  font-size: 0.84rem;
   line-height: 1.5;
-  max-width: 100%;
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
   word-break: break-word;
+  box-shadow: var(--shadow-sm);
+  width: 100%;
 }
 
-.callout-icon {
-  flex-shrink: 0;
-  font-size: 1rem;
-  margin-top: 0.05rem;
+.coaching-card.vocab {
+  background: var(--card-vocab-bg);
+  border-color: var(--card-vocab-border);
 }
 
-.callout-text strong {
+.card-icon { flex-shrink: 0; font-size: 0.95rem; margin-top: 0.05rem; }
+
+.card-body { color: var(--text-secondary, var(--text-primary)); }
+[data-theme="dark"] .card-body { color: var(--text-muted); }
+
+.card-label {
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   display: block;
   margin-bottom: 0.15rem;
+  color: var(--text-primary);
 }
 
-.callout-correction {
-  background: var(--correction-bg);
-  border-left: 3px solid var(--correction-border);
+/* ── Typing indicator ─────────────────────────────────────────────────── */
+.typing-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0 0.75rem 0.25rem;
 }
 
-.callout-vocab {
-  background: var(--vocab-bg);
-  border-left: 3px solid var(--vocab-border);
+.typing-bubble {
+  background: var(--agent-bg);
+  border-radius: var(--radius-bubble) var(--radius-bubble) var(--radius-bubble) 4px;
+  padding: 0.65rem 1rem;
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
 }
 
-/* ── System / error messages ─────────────────────────────────────────────── */
+.typing-bubble span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: bounce 1.2s ease-in-out infinite;
+}
+
+.typing-bubble span:nth-child(1) { animation-delay: 0s; }
+.typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+.typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0);    opacity: 0.5; }
+  30%            { transform: translateY(-5px); opacity: 1;   }
+}
+
+.hidden { display: none !important; }
+
+/* ── System messages ───────────────────────────────────────────────────── */
 .system-msg {
   align-self: center;
-  background: transparent;
+  background: rgba(255,255,255,0.75);
   color: var(--text-muted);
-  font-size: 0.85rem;
-  font-style: italic;
+  font-size: 0.78rem;
   text-align: center;
-  max-width: 480px;
-  padding: 0.5rem 0;
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  max-width: 360px;
+  backdrop-filter: blur(4px);
+  margin: 0.25rem 0;
+}
+
+[data-theme="dark"] .system-msg {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .error-msg {
   color: var(--error);
-  font-style: normal;
   font-weight: 500;
+  background: rgba(239,68,68,0.08);
 }
 
-/* ── Input form ──────────────────────────────────────────────────────────── */
+/* Dialect-change pill */
+.dialect-change-msg {
+  align-self: center;
+  background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 0.25rem 0.85rem;
+  margin: 0.15rem 0;
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+}
+
+/* ── Input bar ─────────────────────────────────────────────────────────── */
 #chat-form {
   display: flex;
-  gap: 0.6rem;
+  align-items: center;
+  gap: 0.5rem;
   flex-shrink: 0;
+  background: var(--chat-surface);
+  border: 1px solid var(--border);
+  border-radius: 32px;
+  padding: 0.4rem 0.4rem 0.4rem 1rem;
+  box-shadow: var(--shadow-md);
+  transition: background 0.25s, border-color 0.25s;
 }
 
 #user-input {
   flex: 1;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
+  background: transparent;
+  border: none;
   color: var(--text-primary);
   font-size: 0.95rem;
-  padding: 0.7rem 1rem;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  line-height: 1.5;
+  resize: none;
+  min-height: 24px;
+  max-height: 120px;
 }
 
-#user-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.15);
-}
+#user-input:focus { outline: none; }
 
-#user-input::placeholder {
-  color: #b0aba3;
-}
+#user-input::placeholder { color: var(--text-muted); }
 
 #send-btn {
-  background: var(--accent);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
   border: none;
-  border-radius: var(--radius);
+  background: var(--accent);
   color: #fff;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 0.7rem 1.4rem;
-  transition: background 0.15s, transform 0.1s;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s, opacity 0.15s;
 }
 
-#send-btn:hover:not(:disabled) {
-  background: #3d6b4b;
+#send-btn svg {
+  width: 18px;
+  height: 18px;
 }
 
-#send-btn:active:not(:disabled) {
-  transform: scale(0.97);
-}
+#send-btn:hover:not(:disabled)  { background: var(--accent-dark); }
+#send-btn:active:not(:disabled) { transform: scale(0.92); }
+#send-btn:disabled              { opacity: 0.45; cursor: not-allowed; }
 
-#send-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-/* ── Responsive ──────────────────────────────────────────────────────────── */
+/* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 520px) {
-  .message, .message-group {
-    max-width: 90%;
-  }
-
-  .header-inner {
-    gap: 0.6rem;
-  }
-
-  header h1 {
-    font-size: 1rem;
-  }
+  .bubble, .message-group { max-width: 85%; }
+  .header-info h1          { font-size: 0.95rem; }
+  .agent-subtitle          { display: none; }
 }
