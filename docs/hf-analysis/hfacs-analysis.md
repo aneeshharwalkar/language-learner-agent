@@ -83,7 +83,7 @@ Jiang et al. (2021) document the organizational decision about what to measure. 
 
 Godwin-Jones (2018) names the commercial logic: isolated drill items are cheap to generate at scale, easy to gamify, and produce the short-term memorization gains that feel rewarding to users. Context-rich, socially embedded instruction costs more and converts less directly to DAU. The decontextualized architecture is not pedagogically naive — it is commercially efficient. The organization's cost-benefit calculus consistently favors the scalable, gamified approach.
 
-From the perspective of **transparency as a system variable** (Loft et al., 2021): when Duolingo surfaces confident progress indicators — skill levels, crowns, completion percentages — it is amplifying learner confidence in a representation of ability that does not include speaking. Transparency about the wrong signal is worse than no signal, because it suppresses the healthy skepticism that might lead a learner to seek supplementary practice. "The System never changed — You did."
+From the perspective of **transparency as a system variable** (Bhaskara et al., 2021): when Duolingo surfaces confident progress indicators — skill levels, crowns, completion percentages — it is amplifying learner confidence in a representation of ability that does not include speaking. Transparency about the wrong signal is worse than no signal, because it suppresses the healthy skepticism that might lead a learner to seek supplementary practice. "The System never changed — You did."
 
 The Swiss Cheese model maps the full failure chain: organizational KPIs exclude speaking (L4 hole) → algorithm never tasks or measures speaking (L3 hole) → environment provides no contextual encoding (L2 hole) → learner has no signal to act on (L1 hole). All holes are aligned. The incident — failure to transfer to real conversation — is structurally guaranteed.
 
@@ -104,3 +104,4 @@ The Swiss Cheese model maps the full failure chain: organizational KPIs exclude 
 | Essoe et al. (2022). *npj Science of Learning*, 7, 31. | L2 | Baddeley Episodic Buffer; context reinstatement |
 | Mihaylova et al. (2022). *Psychologica Belgica*, 62(1), 252–271. | L2 | Working memory artifact vs. LTM transfer |
 | Mayer (2021). In *Cambridge Handbook of Multimedia Learning* (3rd ed.). | L4 | Social Agency Theory; Personalization Principle; Transparency |
+| Bhaskara, A., Duong, L., Brooks, J., Li, R., McInerney, R., Skinner, M., Pongracic, H., & Loft, S. (2021). Effect of automation transparency in the management of multiple unmanned vehicles. *Applied Ergonomics*, *90*, 103243. https://doi.org/10.1016/j.apergo.2020.103243 | L4 | Transparency as system variable; reasoning transparency vs. outcome visualization; automation reliance |
