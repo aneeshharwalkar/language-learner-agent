@@ -187,16 +187,11 @@ header {
   flex-shrink: 0;
 }
 
-/* Dialect selector */
+/* Dialect selector — pill container for the custom dropdown */
 .dialect-pill {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
   background: rgba(var(--accent-rgb), 0.08);
   border: 1.5px solid rgba(var(--accent-rgb), 0.25);
   border-radius: 20px;
-  padding: 0.25rem 0.6rem 0.25rem 0.5rem;
-  cursor: pointer;
   transition: background 0.15s;
 }
 
@@ -204,21 +199,8 @@ header {
 
 #dialect-flag { font-size: 1.1rem; line-height: 1; user-select: none; }
 
-.dialect-pill select {
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  border: none;
-  color: var(--accent);
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding-right: 0.2rem;
-}
-
-.dialect-pill select:focus { outline: none; }
-
-[data-theme="dark"] .dialect-pill select option { background: #0f3460; }
+/* Dialect dropdown menu opens right-aligned (pill sits near right edge of header) */
+.dialect-pill .dropdown-menu { right: 0; left: auto; }
 
 /* Theme toggle */
 #theme-toggle {
@@ -239,6 +221,36 @@ header {
 
 #theme-toggle:hover { background: rgba(var(--accent-rgb), 0.08); border-color: var(--accent); }
 
+/* Global translation toggle — shares visual DNA with the theme toggle */
+#translation-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+  padding: 0;
+}
+#translation-toggle:hover {
+  background: rgba(var(--accent-rgb), 0.08);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+#translation-toggle.active {
+  background: rgba(var(--accent-rgb), 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+#translation-toggle .eye-closed { display: none; }
+#translation-toggle.active .eye-open   { display: none; }
+#translation-toggle.active .eye-closed { display: block; }
+
 /* ── Main layout ───────────────────────────────────────────────────────── */
 main {
   flex: 1;
@@ -250,6 +262,235 @@ main {
   padding: 0.75rem 1rem;
   gap: 0.6rem;
   min-height: 0;
+}
+
+/* ── Context bar: scenario selector + fluency counter ──────────────────── */
+.context-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  background: var(--chat-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.5rem 0.75rem;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.25s, border-color 0.25s;
+}
+
+/* Scenario selector — pill container for the custom dropdown */
+.scenario-pill {
+  background: rgba(var(--accent-rgb), 0.06);
+  border: 1.5px solid rgba(var(--accent-rgb), 0.2);
+  border-radius: 20px;
+  transition: background 0.15s;
+  min-width: 0;
+}
+
+.scenario-pill:hover { background: rgba(var(--accent-rgb), 0.12); }
+
+.scenario-icon { font-size: 0.95rem; line-height: 1; user-select: none; }
+
+.scenario-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Scenario dropdown menu opens left-aligned (pill sits near left edge of context bar) */
+.scenario-pill .dropdown-menu { left: 0; right: auto; }
+
+/* ── Custom dropdown (whole-pill clickable trigger + themed menu) ─────── */
+.custom-dropdown {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  padding: 0.3rem 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  border-radius: inherit;
+  white-space: nowrap;
+}
+
+.dropdown-trigger:focus { outline: none; }
+.dropdown-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.dropdown-value {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.dropdown-chevron {
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  color: var(--accent);
+  opacity: 0.75;
+  flex-shrink: 0;
+  transition: transform 0.18s ease, opacity 0.15s;
+}
+
+.custom-dropdown.open .dropdown-chevron {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  min-width: 100%;
+  margin: 0;
+  padding: 0.3rem;
+  list-style: none;
+  background: var(--chat-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  z-index: 30;
+  animation: dropdown-in 0.14s ease-out;
+}
+
+.dropdown-menu[hidden] { display: none; }
+
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: background 0.12s;
+}
+
+.dropdown-option:hover {
+  background: rgba(var(--accent-rgb), 0.12);
+}
+
+.dropdown-option[aria-selected="true"] {
+  background: rgba(var(--accent-rgb), 0.16);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.dropdown-option[aria-selected="true"]::after {
+  content: "✓";
+  margin-left: auto;
+  padding-left: 0.75rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.option-icon  { font-size: 1rem; line-height: 1; }
+.option-label { flex: 1; }
+
+/* Fluency stats — honest session counter (Duolingo contrast) */
+.fluency-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.stat-icon { font-size: 0.9rem; line-height: 1; }
+
+.stat-label {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.stat-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: rgba(var(--accent-rgb), 0.1);
+  padding: 0.05rem 0.45rem;
+  border-radius: 10px;
+  min-width: 1.4rem;
+  text-align: center;
+  display: inline-block;
+  transform-origin: center;
+}
+
+/* Streak flash — positive scale+glow on increment, amber pulse on reset.
+   The learner should feel the signal, not just see a number tick. */
+@keyframes streak-flash-up {
+  0%   { transform: scale(1);    background: rgba(var(--accent-rgb), 0.1);
+         box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); color: var(--text-primary); }
+  35%  { transform: scale(1.3);  background: rgba(74, 222, 128, 0.28);
+         box-shadow: 0 0 0 6px rgba(74, 222, 128, 0.28); color: #166534; }
+  100% { transform: scale(1);    background: rgba(var(--accent-rgb), 0.1);
+         box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); color: var(--text-primary); }
+}
+@keyframes streak-flash-reset {
+  0%   { transform: scale(1);    background: rgba(var(--accent-rgb), 0.1);
+         box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); color: var(--text-primary); }
+  35%  { transform: scale(1.15); background: rgba(245, 158, 11, 0.32);
+         box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.22); color: #92400e; }
+  100% { transform: scale(1);    background: rgba(var(--accent-rgb), 0.1);
+         box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); color: var(--text-primary); }
+}
+
+#stat-streak.flash-up    { animation: streak-flash-up    0.4s ease-out; }
+#stat-streak.flash-reset { animation: streak-flash-reset 0.4s ease-out; }
+
+.stat-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+}
+
+/* Scenario-change system pill */
+.scenario-change-msg {
+  align-self: center;
+  background: rgba(255,255,255,0.75);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 0.25rem 0.85rem;
+  margin: 0.15rem 0;
+  border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .scenario-change-msg {
+  background: rgba(255,255,255,0.04);
 }
 
 /* ── Chat window — card feel like previous design ──────────────────────── */
@@ -334,6 +575,98 @@ main {
   box-shadow: var(--shadow-sm);
 }
 
+/* Agent reply: Spanish (target language) is primary, sans-serif, full color.
+   English translation gets a distinct serif italic treatment on its own line
+   so learners can instantly find the gloss vs the Spanish they're learning. */
+.agent-bubble .translation {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding-top: 0.45rem;
+  border-top: 1px dashed rgba(0, 0, 0, 0.12);
+  font-family: "Georgia", "Iowan Old Style", "Palatino", serif;
+  font-style: italic;
+  font-size: 0.86em;
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.agent-bubble .translation::before {
+  content: "EN";
+  flex-shrink: 0;
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--accent);
+  font-family: -apple-system, "SF Pro Text", system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 0.7em;
+  letter-spacing: 0.06em;
+  align-self: flex-start;
+  margin-top: 0.25em;
+}
+
+.agent-bubble .translation-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.agent-bubble .translation-placeholder {
+  display: none;
+  flex: 1;
+  color: var(--text-muted);
+  opacity: 0.55;
+  font-size: 0.95em;
+}
+
+.agent-bubble .translation.collapsed .translation-text { display: none; }
+.agent-bubble .translation.collapsed .translation-placeholder { display: inline; }
+
+/* Per-message eye toggle — subtle so it doesn't compete with the translation */
+.agent-bubble .translation-toggle {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 0.15em;
+  padding: 0.15rem;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s, background 0.12s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.agent-bubble .translation-toggle:hover {
+  opacity: 1;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.1);
+}
+.agent-bubble .translation-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  opacity: 1;
+}
+.agent-bubble .translation-toggle .eye-closed { display: none; }
+.agent-bubble .translation.collapsed .translation-toggle .eye-open   { display: none; }
+.agent-bubble .translation.collapsed .translation-toggle .eye-closed { display: block; }
+
+[data-theme="dark"] .agent-bubble .translation {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.agent-bubble .translation-inline {
+  font-family: "Georgia", "Iowan Old Style", "Palatino", serif;
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 0.92em;
+}
+
 /* Timestamp inside bubble */
 .bubble-meta {
   display: flex;
@@ -379,6 +712,28 @@ main {
 .coaching-card.vocab {
   background: var(--card-vocab-bg);
   border-color: var(--card-vocab-border);
+}
+
+/* Polish corrections — a nudge, not an error. Subtle by design. */
+.coaching-card.correction-polish {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--text-muted);
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  box-shadow: none;
+}
+.coaching-card.correction-polish .card-icon  { opacity: 0.55; font-size: 0.9rem; }
+.coaching-card.correction-polish .card-label {
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+[data-theme="dark"] .coaching-card.correction-polish {
+  background: rgba(255, 255, 255, 0.02);
+  border-left-color: var(--text-muted);
 }
 
 .card-icon { flex-shrink: 0; font-size: 0.95rem; margin-top: 0.05rem; }
@@ -530,4 +885,8 @@ main {
   .bubble, .message-group { max-width: 85%; }
   .header-info h1          { font-size: 0.95rem; }
   .agent-subtitle          { display: none; }
+
+  .context-bar             { gap: 0.5rem; padding: 0.45rem 0.6rem; }
+  .scenario-label          { display: none; }
+  .fluency-stats .stat-label { display: none; }
 }

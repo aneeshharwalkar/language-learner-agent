@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" data-dialect="mexican-spanish">
+<html lang="en" data-theme="dark" data-dialect="mexican-spanish">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -24,23 +24,101 @@
       </div>
 
       <div class="header-right">
-        <!-- Dialect selector -->
-        <div class="dialect-pill">
-          <span id="dialect-flag" aria-hidden="true">🇲🇽</span>
-          <select id="dialect" aria-label="Select dialect">
-            <option value="mexican-spanish">Mexican Spanish</option>
-            <option value="castilian-spanish">Castilian Spanish</option>
-          </select>
+        <!-- Dialect selector (custom dropdown — full-pill clickable, themed menu) -->
+        <div class="dialect-pill custom-dropdown" id="dialect" data-value="mexican-spanish">
+          <button type="button" class="dropdown-trigger"
+                  aria-haspopup="listbox" aria-expanded="false" aria-label="Select dialect">
+            <span class="dropdown-icon" id="dialect-flag" aria-hidden="true">🇲🇽</span>
+            <span class="dropdown-value" id="dialect-value">Mexican Spanish</span>
+            <svg class="dropdown-chevron" viewBox="0 0 20 20" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 8 10 12 14 8"></polyline>
+            </svg>
+          </button>
+          <ul class="dropdown-menu" role="listbox" hidden>
+            <li role="option" class="dropdown-option" data-value="mexican-spanish" aria-selected="true">
+              <span class="option-icon" aria-hidden="true">🇲🇽</span>
+              <span class="option-label">Mexican Spanish</span>
+            </li>
+            <li role="option" class="dropdown-option" data-value="castilian-spanish" aria-selected="false">
+              <span class="option-icon" aria-hidden="true">🇪🇸</span>
+              <span class="option-label">Castilian Spanish</span>
+            </li>
+          </ul>
         </div>
 
+        <!-- Global translation toggle — lets advanced learners force themselves
+             to stay in Spanish (Cognitive Load Mgmt). Persists in localStorage. -->
+        <button id="translation-toggle" aria-label="Toggle all English translations"
+                aria-pressed="false" title="Hide all English translations">
+          <svg class="eye-open" viewBox="0 0 24 24" width="16" height="16" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg class="eye-closed" viewBox="0 0 24 24" width="16" height="16" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+        </button>
+
         <!-- Dark mode toggle — accessibility + evening study sessions -->
-        <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+        <button id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">☀️</button>
       </div>
 
     </div>
   </header>
 
   <main>
+    <!-- Context bar: scenario selector (Essoe 2022 — distinct contextual environments)
+         + honest fluency counter (HFACS L4 contrast to Duolingo's vanity metrics) -->
+    <div class="context-bar">
+      <div class="scenario-pill custom-dropdown" id="scenario" data-value="">
+        <button type="button" class="dropdown-trigger"
+                aria-haspopup="listbox" aria-expanded="false" aria-label="Conversation scenario">
+          <span class="scenario-icon" aria-hidden="true">🎯</span>
+          <span class="scenario-label">Scenario</span>
+          <span class="dropdown-value" id="scenario-value">Freeform</span>
+          <svg class="dropdown-chevron" viewBox="0 0 20 20" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="6 8 10 12 14 8"></polyline>
+          </svg>
+        </button>
+        <ul class="dropdown-menu" role="listbox" hidden>
+          <li role="option" class="dropdown-option" data-value="" aria-selected="true">
+            <span class="option-label">Freeform</span>
+          </li>
+          <li role="option" class="dropdown-option" data-value="restaurant">
+            <span class="option-label">At a restaurant</span>
+          </li>
+          <li role="option" class="dropdown-option" data-value="market">
+            <span class="option-label">At the market</span>
+          </li>
+          <li role="option" class="dropdown-option" data-value="meeting-someone">
+            <span class="option-label">Meeting someone new</span>
+          </li>
+          <li role="option" class="dropdown-option" data-value="directions">
+            <span class="option-label">Getting directions</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="fluency-stats" role="status" aria-live="polite">
+        <div class="stat" title="Corrections this session">
+          <span class="stat-icon" aria-hidden="true">✏️</span>
+          <span class="stat-label">Corrections</span>
+          <span class="stat-value" id="stat-corrections">0</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat" title="Turns without an error, in a row">
+          <span class="stat-icon" aria-hidden="true">🔥</span>
+          <span class="stat-label">Clean streak</span>
+          <span class="stat-value" id="stat-streak">0</span>
+        </div>
+      </div>
+    </div>
+
     <div id="chat-window">
       <div id="messages">
         <div class="system-msg">
@@ -115,6 +193,7 @@
     const input       = document.getElementById("user-input");
     const sendBtn     = document.getElementById("send-btn");
     const dialectEl   = document.getElementById("dialect");
+    const scenarioEl  = document.getElementById("scenario");
     const flagEl      = document.getElementById("dialect-flag");
     const avatarHdr   = document.getElementById("agent-avatar-header");
     const nameHdr     = document.getElementById("agent-name-header");
@@ -122,14 +201,158 @@
     const typingRow   = document.getElementById("typing-row");
     const typingAvt   = document.getElementById("typing-avatar");
     const themeToggle = document.getElementById("theme-toggle");
+    const statCorrectionsEl = document.getElementById("stat-corrections");
+    const statStreakEl      = document.getElementById("stat-streak");
+    const translationToggleBtn = document.getElementById("translation-toggle");
 
     let turn = 0;
+    let currentScenario = "";   // tracked separately so we can revert after a cancelled confirm
+
+    /* ── Translation visibility preference (localStorage-persisted) ────────
+       HF rationale: defaulting to hidden forces Spanish-first processing; the
+       user can reveal per-message or globally when they hit a wall. Saved
+       pref (once set) overrides the default and survives reloads. */
+    const TRANSLATIONS_KEY = "lla.translationsHidden";
+    const storedTranslationsPref = localStorage.getItem(TRANSLATIONS_KEY);
+    let globalTranslationsHidden =
+      storedTranslationsPref === null ? true : storedTranslationsPref === "true";
+
+    /* ── Per-dialect color lookup ──────────────────────────────────────────
+       Probes CSS once so the dialect accent colors come from one source of
+       truth (style.css). Used to inline-freeze colors on past-message avatars
+       and switch pills so they stay locked even after the user switches
+       dialects again. */
+    const DIALECT_COLORS = (() => {
+      const out = {};
+      for (const key of Object.keys(DIALECTS)) {
+        const probe = document.createElement("div");
+        probe.dataset.dialect = key;
+        probe.style.display = "none";
+        document.body.appendChild(probe);
+        const cs = getComputedStyle(probe);
+        out[key] = {
+          accent: cs.getPropertyValue("--accent").trim(),
+          rgb:    cs.getPropertyValue("--accent-rgb").trim()
+        };
+        probe.remove();
+      }
+      return out;
+    })();
+
+    /* ── Custom dropdown (whole-pill clickable, themed menu) ───────────────
+       Exposes a .value getter/setter and fires a native-like "change" event
+       so existing listeners on dialectEl/scenarioEl keep working. */
+    function initCustomDropdown(root) {
+      const trigger = root.querySelector(".dropdown-trigger");
+      const menu    = root.querySelector(".dropdown-menu");
+      const options = Array.from(root.querySelectorAll(".dropdown-option"));
+      const valueEl = root.querySelector(".dropdown-value");
+      const iconEl  = root.querySelector(".dropdown-icon");
+
+      Object.defineProperty(root, "value", {
+        get() { return root.dataset.value || ""; },
+        set(v) { selectValue(v, false); }
+      });
+
+      function selectValue(val, fireChange = true) {
+        const opt = options.find(o => o.dataset.value === val);
+        if (!opt) return;
+        const wasSame = root.dataset.value === val;
+        root.dataset.value = val;
+        options.forEach(o => o.setAttribute("aria-selected", o === opt ? "true" : "false"));
+        const labelText = (opt.querySelector(".option-label")?.textContent || "").trim();
+        const iconText  = (opt.querySelector(".option-icon")?.textContent  || "").trim();
+        if (valueEl) valueEl.textContent = labelText;
+        if (iconEl && iconText) iconEl.textContent = iconText;
+        if (fireChange && !wasSame) root.dispatchEvent(new Event("change"));
+      }
+
+      function setOpen(open) {
+        root.classList.toggle("open", open);
+        trigger.setAttribute("aria-expanded", String(open));
+        if (open) menu.removeAttribute("hidden");
+        else      menu.setAttribute("hidden", "");
+      }
+
+      trigger.addEventListener("click", () => {
+        setOpen(!root.classList.contains("open"));
+      });
+
+      options.forEach(opt => {
+        opt.addEventListener("click", () => {
+          selectValue(opt.dataset.value);
+          setOpen(false);
+          trigger.focus();
+        });
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!root.contains(e.target)) setOpen(false);
+      });
+
+      trigger.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setOpen(!root.classList.contains("open"));
+        } else if (e.key === "Escape") {
+          setOpen(false);
+        }
+      });
+
+      // Sync UI to the initial aria-selected option
+      const initial = options.find(o => o.getAttribute("aria-selected") === "true") || options[0];
+      if (initial) selectValue(initial.dataset.value, false);
+    }
+
+    initCustomDropdown(dialectEl);
+    initCustomDropdown(scenarioEl);
+
+    /* ── Fluency counters ──────────────────────────────────────────────────
+       Honest signal (HFACS L4): count actual corrections from the backend,
+       and streak of turns without one. Reset only on new session (page reload). */
+    let correctionsCount = 0;
+    let cleanStreak      = 0;
+
+    function renderStats() {
+      statCorrectionsEl.textContent = correctionsCount;
+      statStreakEl.textContent      = cleanStreak;
+    }
+    renderStats();
 
     /* ── Theme toggle ──────────────────────────────────────────────────── */
     themeToggle.addEventListener("click", () => {
       const isDark = html.dataset.theme === "dark";
       html.dataset.theme   = isDark ? "light" : "dark";
       themeToggle.textContent = isDark ? "🌙" : "☀️";
+    });
+
+    /* ── Translation toggles ──────────────────────────────────────────────
+       Global pref lives in localStorage. Per-message toggle (delegated below)
+       flips just one translation; changing the global applies to all. */
+    function syncGlobalTranslationUI() {
+      translationToggleBtn.classList.toggle("active", globalTranslationsHidden);
+      translationToggleBtn.setAttribute("aria-pressed", String(globalTranslationsHidden));
+      translationToggleBtn.title = globalTranslationsHidden
+        ? "Show all English translations"
+        : "Hide all English translations";
+    }
+    syncGlobalTranslationUI();
+
+    translationToggleBtn.addEventListener("click", () => {
+      globalTranslationsHidden = !globalTranslationsHidden;
+      localStorage.setItem(TRANSLATIONS_KEY, String(globalTranslationsHidden));
+      messagesEl.querySelectorAll(".translation").forEach(el => {
+        el.classList.toggle("collapsed", globalTranslationsHidden);
+      });
+      syncGlobalTranslationUI();
+    });
+
+    // Per-message translation toggle — event delegation
+    messagesEl.addEventListener("click", (e) => {
+      const btn = e.target.closest(".translation-toggle");
+      if (!btn) return;
+      const block = btn.closest(".translation");
+      if (block) block.classList.toggle("collapsed");
     });
 
     /* ── Dialect change ────────────────────────────────────────────────── */
@@ -143,16 +366,72 @@
       subtitleEl.textContent  = d.subtitle;
     }
 
+    /* ── Scenario change ───────────────────────────────────────────────── */
+    const SCENARIO_LABELS = {
+      "restaurant":      "At a restaurant",
+      "market":          "At the market",
+      "meeting-someone": "Meeting someone new",
+      "directions":      "Getting directions"
+    };
+
+    function hasActiveConversation() {
+      // Real learner/agent turns — not system/scenario/dialect pills
+      return messagesEl.querySelector(".message-row") !== null;
+    }
+
+    function resetConversation() {
+      // Keep the original welcome hint, drop everything else
+      messagesEl.innerHTML =
+        '<div class="system-msg">' +
+          'Say anything in Spanish — ' +
+          `${DIALECTS[dialectEl.value].name} will respond, correct mistakes, and share vocab tips.` +
+        '</div>';
+      turn = 0;
+      correctionsCount = 0;
+      cleanStreak      = 0;
+      statStreakEl.classList.remove("flash-up", "flash-reset");
+      renderStats();
+    }
+
+    scenarioEl.addEventListener("change", () => {
+      const key = scenarioEl.value;
+
+      /* Essoe 2022 context-integrity: changing scenario mid-chat corrupts the
+         Episodic Buffer's contextual encoding. Confirm + reset if the user
+         has already started a conversation. */
+      if (hasActiveConversation() && key !== currentScenario) {
+        const ok = window.confirm("Change scenario? This will reset the conversation.");
+        if (!ok) {
+          scenarioEl.value = currentScenario;   // setter reverts UI without firing change
+          return;
+        }
+        resetConversation();
+      }
+
+      currentScenario = key;
+
+      const label = SCENARIO_LABELS[key] || "Freeform";
+      const pill  = document.createElement("div");
+      pill.className   = "scenario-change-msg";
+      pill.textContent = key ? `🎯 Scenario set: ${label}` : "🎯 Scenario cleared (freeform)";
+      messagesEl.appendChild(pill);
+      scrollToBottom();
+    });
+
     dialectEl.addEventListener("change", () => {
       const key  = dialectEl.value;
       const d    = DIALECTS[key];
+      const c    = DIALECT_COLORS[key];
       applyDialect(key);
 
-      /* System pill — visual record of dialect switch; stamped so later
-         switches don't re-color earlier pills */
+      /* System pill — visual record of dialect switch. Inline-freeze colors
+         so later switches don't repaint this pill. */
       const pill = document.createElement("div");
       pill.className     = "dialect-change-msg";
       pill.dataset.dialect = key;
+      pill.style.color           = c.accent;
+      pill.style.backgroundColor = `rgba(${c.rgb}, 0.1)`;
+      pill.style.borderColor     = `rgba(${c.rgb}, 0.2)`;
       pill.textContent   = `${d.flag} Switched to ${d.name} · ${d.subtitle}`;
       messagesEl.appendChild(pill);
       scrollToBottom();
@@ -163,6 +442,74 @@
       const m = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
       return str.replace(/[&<>"]/g, c => m[c]);
     }
+
+    /* Per-message translation block with an eye toggle. Trailing "(English)"
+       becomes a collapsible block; inline parens get subtler italic styling. */
+    function buildTranslationBlock(escapedInner) {
+      const collapsedCls = globalTranslationsHidden ? " collapsed" : "";
+      return (
+        `<span class="translation${collapsedCls}" lang="en">` +
+          `<span class="translation-text">${escapedInner}</span>` +
+          `<span class="translation-placeholder" aria-hidden="true">translation hidden</span>` +
+          `<button type="button" class="translation-toggle" aria-label="Toggle English translation">` +
+            `<svg class="eye-open" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
+              `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>` +
+            `</svg>` +
+            `<svg class="eye-closed" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">` +
+              `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>` +
+            `</svg>` +
+          `</button>` +
+        `</span>`
+      );
+    }
+
+    function formatReply(text) {
+      let s = escapeHtml(text);
+      s = s.replace(/\s*\(([^()]+)\)\s*$/, (_m, g1) => buildTranslationBlock(g1));
+      s = s.replace(/\(([^()]+)\)/g, '<span class="translation-inline" lang="en">($1)</span>');
+      return s;
+    }
+
+    /* Correction shape is evolving: backend may return a plain string (current
+       prod) OR {text, severity: "critical" | "polish"} (upcoming). Normalize
+       here so new UI works either way and doesn't crash if Aneesh's push
+       lands mid-demo. */
+    function normalizeCorrection(c) {
+      if (!c) return null;
+      if (typeof c === "string") {
+        return c.trim() ? { text: c, severity: "critical" } : null;
+      }
+      if (typeof c === "object" && typeof c.text === "string" && c.text.trim()) {
+        const sev = c.severity === "polish" ? "polish" : "critical";
+        return { text: c.text, severity: sev };
+      }
+      return null;
+    }
+
+    function buildCorrectionCard(correction) {
+      const card = document.createElement("div");
+      card.className = `coaching-card correction-${correction.severity}`;
+      const isCritical = correction.severity === "critical";
+      const icon  = isCritical ? "✏️" : "✎";
+      const label = isCritical ? "Correction" : "Polish";
+      card.innerHTML =
+        `<span class="card-icon">${icon}</span>` +
+        `<span class="card-body"><span class="card-label">${label}</span>${escapeHtml(correction.text)}</span>`;
+      return card;
+    }
+
+    /* Brief animation on the streak counter so the learner *feels* progress
+       (or a reset), not just sees a number tick. Re-triggers by removing and
+       re-adding the class with a forced reflow. */
+    function flashStreak(kind) {
+      statStreakEl.classList.remove("flash-up", "flash-reset");
+      // eslint-disable-next-line no-unused-expressions
+      void statStreakEl.offsetWidth;
+      statStreakEl.classList.add(kind === "up" ? "flash-up" : "flash-reset");
+    }
+    statStreakEl.addEventListener("animationend", () => {
+      statStreakEl.classList.remove("flash-up", "flash-reset");
+    });
 
     function nowTime() {
       return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -207,6 +554,9 @@
       const avatar = document.createElement("div");
       avatar.className   = "agent-avatar";
       avatar.textContent = d.initial;
+      /* Freeze avatar color to the dialect this message was sent in, so later
+         dialect switches don't repaint the speaker of past replies. */
+      avatar.style.backgroundColor = DIALECT_COLORS[dialectKey].accent;
 
       const group = document.createElement("div");
       group.className = "message-group";
@@ -215,16 +565,13 @@
       const bubble = document.createElement("div");
       bubble.className = "bubble agent-bubble";
       bubble.setAttribute("lang", "es");
-      bubble.innerHTML = `${escapeHtml(data.reply)}<div class="bubble-meta"><span class="ts">${nowTime()}</span></div>`;
+      bubble.innerHTML = `${formatReply(data.reply)}<div class="bubble-meta"><span class="ts">${nowTime()}</span></div>`;
       group.appendChild(bubble);
 
-      /* Correction card — Godwin-Jones 2018: explicit corrective feedback matters */
-      if (data.correction) {
-        const card = document.createElement("div");
-        card.className = "coaching-card";
-        card.innerHTML = `<span class="card-icon">✏️</span><span class="card-body"><span class="card-label">Correction</span>${escapeHtml(data.correction)}</span>`;
-        group.appendChild(card);
-      }
+      /* Correction card — Godwin-Jones 2018: explicit corrective feedback matters.
+         Bhaskara severity differentiation: "critical" = error, "polish" = nudge. */
+      const correction = normalizeCorrection(data.correction);
+      if (correction) group.appendChild(buildCorrectionCard(correction));
 
       /* Vocab tip card */
       if (data.vocab_tip) {
@@ -257,7 +604,7 @@
     }
 
     /* ── Fetch ─────────────────────────────────────────────────────────── */
-    async function sendMessage(dialect, message, turn) {
+    async function sendMessage(dialect, message, turn, scenario) {
       if (USE_MOCK) {
         await new Promise(r => setTimeout(r, 900));
         return DIALECTS[dialect]?.mock ?? DIALECTS["mexican-spanish"].mock;
@@ -269,7 +616,7 @@
         const res = await fetch(API_URL, {
           method:  "POST",
           headers: { "Content-Type": "application/json" },
-          body:    JSON.stringify({ dialect, message, turn }),
+          body:    JSON.stringify({ dialect, message, turn, scenario: scenario || null }),
           signal:  controller.signal
         });
         if (!res.ok) {
@@ -289,15 +636,31 @@
       const message = input.value.trim();
       if (!message) return;
 
-      const dialect = dialectEl.value;
+      const dialect  = dialectEl.value;
+      const scenario = scenarioEl.value;
       input.value = "";
       appendUserMessage(message, dialect);
       setLoading(true);
 
       try {
-        const data = await sendMessage(dialect, message, turn);
+        const data = await sendMessage(dialect, message, turn, scenario);
         turn++;
         appendAgentMessage(data, dialect);
+
+        /* Honest fluency signal: update counters from the actual correction field.
+           Any correction (critical or polish) breaks the clean streak. */
+        const hasCorrection = !!normalizeCorrection(data.correction);
+        if (hasCorrection) {
+          correctionsCount++;
+          const wasStreak = cleanStreak > 0;
+          cleanStreak = 0;
+          renderStats();
+          if (wasStreak) flashStreak("reset");
+        } else {
+          cleanStreak++;
+          renderStats();
+          flashStreak("up");
+        }
       } catch (err) {
         appendErrorMessage(
           err.name === "AbortError"
