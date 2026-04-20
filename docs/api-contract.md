@@ -12,7 +12,11 @@
 {
   "dialect": "mexican-spanish" | "castilian-spanish",
   "message": "string",
-  "turn": number
+  "turn": number,
+  "scenario": "restaurant" | "market" | "meeting-someone" | "directions" | null,
+  "history": [
+    { "role": "user" | "assistant", "content": "string" }
+  ]
 }
 ```
 
@@ -21,6 +25,8 @@
 | `dialect` | string | Which dialect agent to route to |
 | `message` | string | The learner's message |
 | `turn` | number | Conversation turn index (for history tracking in UI) |
+| `scenario` | string or null | Optional. Conversation context (e.g., `"restaurant"`). Agent uses it to scaffold the opening and stay on-topic. `null` or omitted = freeform. |
+| `history` | array | Optional. Prior turns in the same conversation, oldest first. Each item has `role` (`"user"` or `"assistant"`) and `content`. Empty or omitted on turn 0. Backend forwards this to Claude as the `messages` list. |
 
 ### Response
 
