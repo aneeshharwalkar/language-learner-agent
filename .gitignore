@@ -17,3 +17,10 @@ venv/
 # Editor
 .vscode/
 .idea/
+
+# Claude Code local session state
+.claude/
+
+# R history
+.Rhistory
+*.Rhistory
